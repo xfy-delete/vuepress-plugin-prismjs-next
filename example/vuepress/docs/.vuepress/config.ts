@@ -13,7 +13,7 @@ export default defineUserConfig<DefaultThemeOptions>({
     resolve(__dirname, '../../../../lib'),
     {
       languages: ['java', 'css', 'javascript', 'typescript', 'html', 'json', 'shell', 'yaml', 'diff'],
-      plugins: ["inline-color", "autolinker", "data-uri-highlight", "diff-highlight"],
+      plugins: ['inline-color'], // , "autolinker", "data-uri-highlight", "diff-highlight"
       theme: "dark",
     }
   ]],
@@ -24,7 +24,7 @@ export default defineUserConfig<DefaultThemeOptions>({
   },
   markdown: {
     code: {
-      preWrapper: false
+      preWrapper: false,
     },
     customComponent: false,
   },

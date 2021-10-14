@@ -1,7 +1,8 @@
-import type { PluginFunction, AppOptions, PluginObject } from '@vuepress/core';
+import type { PluginFunction, App, PluginObject } from '@vuepress/core';
 import * as MarkdownIt from 'markdown-it';
 import Prism from 'prismjs';
 import rawLoadLanguages from 'prismjs/components/index';
+import { loadPlugins, loadTheme } from './plugins';
 
 type optionsType = {
   languages?: Array<string>,
@@ -17,19 +18,16 @@ function loadLanguages(languages: Array<string> | undefined): void {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
-const plugin = (md: MarkdownIt, options: optionsType, _app?: AppOptions) => {
+const plugin = (md: MarkdownIt, options: optionsType, app?: App) => {
   const temp = options || {};
-  // loadTheme(app || md, temp.css, temp.theme);
-  // loadPlugins(app || md, temp.css, temp.plugins);
+  loadTheme(app || md, temp.css, temp.theme);
+  loadPlugins(app || md, temp.css, temp.plugins);
   if (temp.languages?.length !== 0) {
     loadLanguages(temp.languages);
   }
 
-  console.log(222222);
   md.options.highlight = (code, lang) => {
     const prismLang = Prism.languages[lang];
-    // console.log(code);
     const html = prismLang
       ? Prism.highlight(code, prismLang, lang)
       : md.utils.escapeHtml(code);
@@ -40,8 +38,7 @@ const plugin = (md: MarkdownIt, options: optionsType, _app?: AppOptions) => {
   };
 };
 
-export default (options: PluginFunction<optionsType> | MarkdownIt, app: AppOptions | MarkdownIt.PluginWithOptions<optionsType>): void | PluginObject => {
-  console.log('111111111111111');
+export default (options: PluginFunction<optionsType> | MarkdownIt, app: App | MarkdownIt.PluginWithOptions<optionsType>): void | PluginObject => {
   if (typeof (options as MarkdownIt).use === 'function') {
     plugin(options as MarkdownIt, app as optionsType);
     return undefined;
@@ -49,7 +46,7 @@ export default (options: PluginFunction<optionsType> | MarkdownIt, app: AppOptio
   return {
     name: 'markdown-prismjs-plugin',
     extendsMarkdown(md) {
-      plugin(md, options as optionsType, app as AppOptions);
+      plugin(md, options as optionsType, app as App);
     },
   };
 };

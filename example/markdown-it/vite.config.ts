@@ -6,35 +6,33 @@ import { resolve } from 'path';
 
 const pathResolve = (pathStr: string) => resolve(__dirname, pathStr);
 
-export default (): UserConfigExport => {
-  return defineConfig({
-    plugins: [vue(), vueJsx(), html()],
-    resolve: {
-      alias: {
-        '@': pathResolve('./src'),
+export default (): UserConfigExport => defineConfig({
+  plugins: [vue(), vueJsx(), html()],
+  resolve: {
+    alias: {
+      '@': pathResolve('./src'),
+    },
+  },
+  build: {
+    target: 'es2015',
+    outDir: 'dist',
+    terserOptions: {
+      compress: {
+        keep_infinity: true,
+        drop_console: true,
+        drop_debugger: true,
       },
     },
-    build: {
-      target: 'es2015',
-      outDir: 'dist',
-      terserOptions: {
-        compress: {
-          keep_infinity: true,
-          drop_console: true,
-          drop_debugger: true,
-        },
-      },
-      brotliSize: false,
-      chunkSizeWarningLimit: 2000,
-    },
-    server: {
-      port: 8082,
-      open: false,
-      host: '0.0.0.0',
-      https: false,
-    },
-    css: {
-      preprocessorOptions: {},
-    },
-  });
-};
+    brotliSize: false,
+    chunkSizeWarningLimit: 2000,
+  },
+  server: {
+    port: 8082,
+    open: false,
+    host: '0.0.0.0',
+    https: false,
+  },
+  css: {
+    preprocessorOptions: {},
+  },
+});
