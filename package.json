@@ -1,23 +1,27 @@
 {
-  "name": "vuepress-plugin-prismjs",
+  "name": "markdown-prismjs-plugin",
   "private": false,
-  "version": "0.26.1",
-  "description": "VuePress plugin prismjs自定义配置",
+  "version": "0.0.1",
+  "description": "markdown prismjs自定义配置",
   "keywords": [
     "vuepress-plugin",
     "vuepress",
     "plugin",
     "prismjs",
     "highlight",
-    "vuepress-plugin-prismjs"
+    "vuepress plugin prismjs",
+    "markdown",
+    "markdown-it",
+    "markdown-it plugin",
+    "markdown-it plugin prismjs"
   ],
-  "homepage": "https://github.com/xfy520/vuepress-plugin-prismjs",
+  "homepage": "https://github.com/xfy520/markdown-prismjs-plugin",
   "bugs": {
-    "url": "https://github.com/xfy520/vuepress-plugin-prismjs/issues"
+    "url": "https://github.com/xfy520/markdown-prismjs-plugin/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xfy520/vuepress-plugin-prismjs.git"
+    "url": "git+https://github.com/xfy520/markdown-prismjs-plugin.git"
   },
   "license": "MIT",
   "author": "xfy520 <longzinziyan@gmail.com>",
@@ -29,9 +33,40 @@
   "publishConfig": {
     "access": "public"
   },
+  "scripts": {
+    "build": "tsup-node --legacy-output",
+    "tsc": "tsc && tsc -module ES6 -outDir lib/esm"
+  },
   "devDependencies": {
+    "@types/prismjs": "^1.16.6",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
     "@vuepress/core": "^2.0.0-beta.26",
-    "clean-css": "^5.2.1",
-    "prismjs": "^1.25.0"
+    "eslint": "^8.0.1",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-import": "^2.25.2",
+    "markdown-it": "^12.2.0",
+    "prismjs": "^1.25.0",
+    "tsup": "^5.4.0",
+    "typescript": "^4.4.4",
+    "typescript-eslint-parser": "^22.0.0",
+    "uglifycss": "^0.0.29"
+  },
+  "tsup": {
+    "dts": true,
+    "format": [
+      "cjs",
+      "esm"
+    ],
+    "target": "es5",
+    "splitting": true,
+    "outDir": "lib",
+    "sourcemap": false,
+    "clean": true,
+    "watch": true,
+    "entryPoints": [
+      "src/index.ts"
+    ]
   }
 }

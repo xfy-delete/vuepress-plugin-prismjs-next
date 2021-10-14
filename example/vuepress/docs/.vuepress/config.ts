@@ -10,7 +10,7 @@ export default defineUserConfig<DefaultThemeOptions>({
   title: 'vuepress-plugin-prismjs 例子',
   description: 'vuepress-plugin-prismjs 例子',
   plugins: [[
-    resolve(__dirname, '../../../index.js'),
+    resolve(__dirname, '../../../../lib'),
     {
       languages: ['java', 'css', 'javascript', 'typescript', 'html', 'json', 'shell', 'yaml', 'diff'],
       plugins: ["inline-color", "autolinker", "data-uri-highlight", "diff-highlight"],

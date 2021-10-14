@@ -1,5 +1,5 @@
 const fs = require('fs');
-const CleanCSS = require('clean-css');
+const uglifycss = require('uglifycss');
 const config = require('prismjs/components');
 const getLoader = require('prismjs/dependencies');
 
@@ -32,12 +32,14 @@ const getThemePath = (theme) => {
 const getPluginPath = getPath('plugins');
 
 function loadPlugins(app, css, plugins) {
-  app.siteData.head = app.siteData.head || [];
   plugins.forEach((plugin) => {
     if (pluginList[plugin]) {
       require(`./${plugin}`);
     }
   });
+  if (app.siteData !== undefined) {
+    app.siteData.head = app.siteData.head || [];
+  }
   if (css) {
     const pluginCss = getLoader(config, [...plugins]).getIds().reduce((deps, dep) => {
       const css = [];
@@ -50,9 +52,14 @@ function loadPlugins(app, css, plugins) {
       try {
         fs.accessSync(`node_modules/${cssPath}`);
         console.log(`node_modules/${cssPath}`);
-        const minifiedCSS = new CleanCSS({}).minify((fs.readFileSync(`node_modules/${cssPath}`).toString()));
-        if (minifiedCSS.styles) {
-          app.siteData.head.push(['style', { type: 'text/css' }, minifiedCSS.styles]);
+        const uglified = uglifycss.processString(
+          fs.readFileSync(`node_modules/${cssPath}`).toString(),
+          { maxLineLen: 500, expandVars: true }
+        );
+        if (uglified) {
+          if (app.siteData !== undefined) {
+            app.siteData.head.push(['style', { type: 'text/css' }, uglified]);
+          }
         }
       } catch (error) {
       }
@@ -65,11 +72,18 @@ function loadTheme(app, css, theme = null) {
     const themeCssPath = getThemePath(theme);
     try {
       fs.accessSync(`node_modules/${themeCssPath}`);
-      app.siteData.head = app.siteData.head || [];
-      const minifiedCSS = new CleanCSS({}).minify((fs.readFileSync(`node_modules/${themeCssPath}`).toString()));
       console.log(`node_modules/${themeCssPath}`);
-      if (minifiedCSS.styles) {
-        app.siteData.head.push(['style', { type: 'text/css' }, minifiedCSS.styles]);
+      const uglified = uglifycss.processString(
+        fs.readFileSync(`node_modules/${themeCssPath}`).toString(),
+        { maxLineLen: 500, expandVars: true }
+      );
+      if (uglified) {
+        if (app.siteData !== undefined) {
+          app.siteData.head = app.siteData.head || [];
+          app.siteData.head.push(['style', { type: 'text/css' }, uglified]);
+        } else {
+
+        }
       }
     } catch (error) {
 
