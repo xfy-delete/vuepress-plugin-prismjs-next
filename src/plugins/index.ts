@@ -1,9 +1,9 @@
 import config from 'prismjs/components';
-import fs from 'fs';
-import uglifycss from 'uglifycss';
-import type { App } from '@vuepress/core';
-import * as MarkdownIt from 'markdown-it';
 import getLoader from 'prismjs/dependencies';
+import Prism from 'prismjs';
+import rawLoadLanguages from './languages';
+
+let globalPlugins = true;
 
 const pluginList = {
   autolinker: true,
@@ -17,18 +17,6 @@ const getPath = (type: string) => (name: string) => `prismjs/${config[type].meta
 const isPlugin = (dep: string) => config.plugins[dep] != null;
 
 const getNoCSS = (type: string, name: string) => !!config[type][name].noCSS;
-
-function isFileExisted(file: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    fs.access(file, (err) => {
-      if (err) {
-        reject(err.message);
-      } else {
-        resolve(true);
-      }
-    });
-  });
-}
 
 const getThemePath = (theme) => {
   if (theme.includes('/')) {
@@ -45,63 +33,79 @@ const getThemePath = (theme) => {
 
 const getPluginPath = getPath('plugins');
 
-function loadPlugins(app: MarkdownIt | App, css?: boolean, plugins?: Array<string>) {
-  if (plugins) {
-    plugins.forEach(async (plugin) => {
-      if (pluginList[plugin]) {
-        await import(/* @vite-ignore */`./${plugin}`);
+function loadPlugins(plugins: Array<string> | undefined, isAsync?: boolean): Promise<boolean> {
+  if (!globalPlugins) {
+    return Promise.reject(new Error('重复注册插件'));
+  }
+  globalPlugins = false;
+  if (isAsync) {
+    return new Promise((resolve, reject) => {
+      if (plugins) {
+        const importList: Array<Promise<any>> = [];
+        for (let index = 0; index < plugins.length;) {
+          const plugin = plugins[index];
+          importList.push(import(/* @vite-ignore */`./${plugin}`) as never);
+          index += 1;
+        }
+        Promise.all(importList).then(() => {
+          resolve(true);
+        }).catch((error) => {
+          reject(error);
+        });
+      } else {
+        resolve(true);
       }
     });
-    if ((app as App).siteData !== undefined) {
-      (app as App).siteData.head = (app as App).siteData.head || [];
-    }
-    if (css === undefined || css) {
-      const pluginCss = getLoader(config, [...plugins]).getIds().reduce((deps: Array<string>, dep: string) => {
-        const temp = [];
-        if (isPlugin(dep) && !getNoCSS('plugins', dep)) {
-          temp.unshift(`${getPluginPath(dep)}.css` as never);
-        }
-        return [...deps, ...temp];
-      }, ([]));
-      pluginCss.forEach((p: string) => {
-        const cssPath = `node_modules/${p}`;
-        isFileExisted(cssPath).then(() => {
-          console.log(cssPath);
-          const uglified = uglifycss.processString(
-            fs.readFileSync(cssPath).toString(),
-            { maxLineLen: 500, expandVars: true },
-          );
-          if (uglified) {
-            if ((app as App).siteData !== undefined) {
-              (app as App).siteData.head.push(['style', { type: 'text/css' }, uglified]);
-            }
-          }
-        });
-      });
-    }
+  }
+  if (plugins) {
+    plugins.forEach((plugin) => {
+      if (pluginList[plugin]) {
+        import(/* @vite-ignore */`./${plugin}`);
+      }
+    });
+  }
+  return Promise.resolve(true);
+}
+
+function loadCss(options: {
+  plugins?: Array<string>,
+  theme?: string
+}, _ctx: unknown) {
+  if (options && options.plugins) {
+    const pluginCss = getLoader(config, [...options.plugins]).getIds().reduce((deps: Array<string>, dep: string) => {
+      const temp = [];
+      if (isPlugin(dep) && !getNoCSS('plugins', dep)) {
+        temp.unshift(`${getPluginPath(dep)}.css` as never);
+      }
+      return [...deps, ...temp];
+    }, ([]));
+    pluginCss.forEach((p: string) => {
+      const cssPath = `node_modules/${p}`;
+      console.log(cssPath);
+    });
+  }
+  if (options && options.theme) {
+    const themeCssPath = `node_modules/${getThemePath(options.theme)}`;
+    console.log(themeCssPath);
   }
 }
 
-function loadTheme(app: MarkdownIt | App, css?: boolean, theme?: string) {
-  if ((css === undefined || css) && theme) {
-    const themeCssPath = `node_modules/${getThemePath(theme)}`;
-    isFileExisted(themeCssPath).then(() => {
-      console.log(themeCssPath);
-      const uglified = uglifycss.processString(
-        fs.readFileSync(themeCssPath).toString(),
-        { maxLineLen: 500, expandVars: true },
-      );
-      if (uglified) {
-        if ((app as App).siteData !== undefined) {
-          (app as App).siteData.head = (app as App).siteData.head || [];
-          (app as App).siteData.head.push(['style', { type: 'text/css' }, uglified]);
-        }
-      }
-    });
+function loadLanguages(languages: Array<string> | undefined): void {
+  const langsToLoad = languages?.filter((item) => !Prism.languages[item]);
+  if (langsToLoad?.length) {
+    rawLoadLanguages(langsToLoad);
   }
+}
+
+let globalTheme: string | undefined;
+
+function setTheme(theme: string | undefined) {
+  globalTheme = theme;
 }
 
 export {
   loadPlugins,
-  loadTheme,
+  loadLanguages,
+  setTheme,
+  loadCss,
 };

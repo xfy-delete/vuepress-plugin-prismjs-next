@@ -1,4 +1,5 @@
 import { defineConfig, UserConfigExport } from 'vite';
+import dynamicImportVars from '@rollup/plugin-dynamic-import-vars';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import html from 'vite-plugin-html';
@@ -15,6 +16,9 @@ export default (): UserConfigExport => defineConfig({
   },
   build: {
     outDir: 'dist',
+    rollupOptions: {
+      plugins: [dynamicImportVars({})]
+    },
     terserOptions: {
       compress: {
         keep_infinity: true,

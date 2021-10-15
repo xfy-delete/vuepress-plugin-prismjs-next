@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, nextTick, ref } from "vue";
 
 import MarkdownIt, { PluginSimple } from "markdown-it";
 // @ts-ignore
@@ -30,14 +30,15 @@ var tmpl = `
 \`\`\`
 `;
 const md = new MarkdownIt();
-md.use(markdownPlugin as PluginSimple, {
-  languages: ['java', 'css', 'javascript', 'typescript', 'html', 'json', 'shell', 'yaml', 'diff'],
-  plugins: ['inline-color'],
-});
+md.use(markdownPlugin as PluginSimple);
 export default defineComponent({
   name: "app",
   setup() {
-    const html = md.render(tmpl);
+    const html = ref('');
+    nextTick(() => {
+      console.log(222)
+      html.value = md.render(tmpl);
+    })
     return {
       html,
     };

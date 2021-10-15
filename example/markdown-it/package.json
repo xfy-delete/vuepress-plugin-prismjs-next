@@ -5,6 +5,7 @@
     "build": "vuedx-typecheck . && vite build"
   },
   "devDependencies": {
+    "@rollup/plugin-dynamic-import-vars": "^1.4.0",
     "@vitejs/plugin-vue": "^1.9.3",
     "@vitejs/plugin-vue-jsx": "^1.2.0",
     "@vue/compiler-sfc": "^3.2.20",

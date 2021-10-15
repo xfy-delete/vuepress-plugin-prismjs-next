@@ -1,8 +1,8 @@
 import type { PluginFunction, App, PluginObject } from '@vuepress/core';
 import * as MarkdownIt from 'markdown-it';
 import Prism from 'prismjs';
-import rawLoadLanguages from './plugins/languages';
-import { loadPlugins, loadTheme } from './plugins';
+
+import { loadPlugins, setTheme, loadLanguages } from './plugins';
 
 type optionsType = {
   languages?: Array<string>,
@@ -11,21 +11,12 @@ type optionsType = {
   css?: boolean
 }
 
-function loadLanguages(languages: Array<string> | undefined): void {
-  const langsToLoad = languages?.filter((item) => !Prism.languages[item]);
-  if (langsToLoad?.length) {
-    rawLoadLanguages(langsToLoad);
-  }
-}
-
-const plugin = (md: MarkdownIt, options: optionsType, app?: App) => {
+const plugin = (md: MarkdownIt, options: optionsType, _app?: App) => {
   const temp = options || {};
-  loadTheme(app || md, temp.css, temp.theme);
-  loadPlugins(app || md, temp.css, temp.plugins);
-  if (temp.languages?.length !== 0) {
-    loadLanguages(temp.languages);
+  if (temp.plugins) {
+    loadPlugins(temp.plugins);
   }
-
+  // loadLanguages(temp.languages);
   md.options.highlight = (code, lang) => {
     const prismLang = Prism.languages[lang];
     const html = prismLang
@@ -38,6 +29,22 @@ const plugin = (md: MarkdownIt, options: optionsType, app?: App) => {
   };
 };
 
+function useOptions(options: optionsType) {
+  return new Promise((resolve, reject) => {
+    if (options) {
+      setTheme(options.theme);
+      loadLanguages(options.languages);
+      loadPlugins(options.plugins, true)?.then(() => {
+        resolve(true);
+      }).catch((error) => {
+        reject(error);
+      });
+    } else {
+      reject();
+    }
+  });
+}
+
 export default (options: PluginFunction<optionsType> | MarkdownIt, app: App | MarkdownIt.PluginWithOptions<optionsType>): void | PluginObject => {
   if (typeof (options as MarkdownIt).use === 'function') {
     plugin(options as MarkdownIt, app as optionsType);
@@ -49,4 +56,8 @@ export default (options: PluginFunction<optionsType> | MarkdownIt, app: App | Ma
       plugin(md, options as optionsType, app as App);
     },
   };
+};
+
+export {
+  useOptions,
 };
