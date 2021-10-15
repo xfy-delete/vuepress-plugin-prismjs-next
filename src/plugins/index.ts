@@ -47,10 +47,9 @@ const getPluginPath = getPath('plugins');
 
 function loadPlugins(app: MarkdownIt | App, css?: boolean, plugins?: Array<string>) {
   if (plugins) {
-    plugins.forEach((plugin) => {
+    plugins.forEach(async (plugin) => {
       if (pluginList[plugin]) {
-        // @ts-ignore
-        import.meta.glob(`./${plugin}`);
+        await import(/* @vite-ignore */`./${plugin}`);
       }
     });
     if ((app as App).siteData !== undefined) {

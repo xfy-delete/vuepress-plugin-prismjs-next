@@ -34,8 +34,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup-node --legacy-output",
-    "tsc": "tsc && tsc -module ES6 -outDir lib/esm"
+    "build": "tsc -module ES6 -outDir lib/esm"
   },
   "devDependencies": {
     "@types/prismjs": "^1.16.6",
@@ -47,24 +46,7 @@
     "eslint-plugin-import": "^2.25.2",
     "markdown-it": "^12.2.0",
     "prismjs": "^1.25.0",
-    "tsup": "^5.4.0",
     "typescript": "^4.4.2",
     "uglifycss": "^0.0.29"
-  },
-  "tsup": {
-    "dts": true,
-    "format": [
-      "cjs",
-      "esm"
-    ],
-    "target": "es5",
-    "splitting": true,
-    "outDir": "lib",
-    "sourcemap": false,
-    "clean": true,
-    "watch": true,
-    "entryPoints": [
-      "src/index.ts"
-    ]
   }
 }

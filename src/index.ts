@@ -1,7 +1,7 @@
 import type { PluginFunction, App, PluginObject } from '@vuepress/core';
 import * as MarkdownIt from 'markdown-it';
 import Prism from 'prismjs';
-import rawLoadLanguages from 'prismjs/components/index';
+import rawLoadLanguages from './plugins/languages';
 import { loadPlugins, loadTheme } from './plugins';
 
 type optionsType = {

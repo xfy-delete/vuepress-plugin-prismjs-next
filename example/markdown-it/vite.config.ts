@@ -14,7 +14,6 @@ export default (): UserConfigExport => defineConfig({
     },
   },
   build: {
-    target: 'es2015',
     outDir: 'dist',
     terserOptions: {
       compress: {

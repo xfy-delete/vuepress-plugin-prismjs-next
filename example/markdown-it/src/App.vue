@@ -34,7 +34,6 @@ md.use(markdownPlugin as PluginSimple, {
   languages: ['java', 'css', 'javascript', 'typescript', 'html', 'json', 'shell', 'yaml', 'diff'],
   plugins: ['inline-color'],
 });
-
 export default defineComponent({
   name: "app",
   setup() {

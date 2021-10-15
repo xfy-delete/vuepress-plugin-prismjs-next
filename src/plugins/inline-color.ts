@@ -1,6 +1,6 @@
 import Prism from 'prismjs';
-// @ts-ignore
-import('prismjs/components/prism-css-extras');
+
+import 'prismjs/components/prism-css-extras';
 
 const HTML_TAG = /<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:'[^']*'|'[^']*'|[^\s''>=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/g;
 
@@ -418,5 +418,3 @@ Prism.hooks.add('wrap', (env) => {
     env.content = previewElement + content;
   }
 });
-
-console.log('-------------------');
