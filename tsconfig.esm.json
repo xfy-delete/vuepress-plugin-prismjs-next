@@ -25,6 +25,6 @@
     "rootDir": "./src"
   },
   "include": [
-    "./src"
+    "./src/clientAppEnhanceFiles.ts",
   ],
 }

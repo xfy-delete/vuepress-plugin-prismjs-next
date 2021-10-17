@@ -9,23 +9,45 @@ export default defineUserConfig<DefaultThemeOptions>({
   lang: 'zh-CN',
   title: 'vuepress-plugin-prismjs 例子',
   description: 'vuepress-plugin-prismjs 例子',
+  head: [['style', { type: 'text/css' }, `
+    .data-uri {
+      background: red;
+    }
+    span[class*="token keyword keyword-"] {
+      color: #f92672 !important;
+    }
+  `], ['script', { type: 'text/javascript', src: 'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js' }]],
   plugins: [[
-    resolve(__dirname, '../../../../lib'),
+    resolve(__dirname, '../../../lib'),
     {
       languages: ['java', 'css', 'javascript', 'typescript', 'html', 'json', 'shell', 'yaml', 'diff'],
-      plugins: ['inline-color'], // , "autolinker", "data-uri-highlight", "diff-highlight"
+      plugins: ['inline-color', 'autolinker', 'data-uri-highlight', 'diff-highlight', 'treeview', 'highlight-keywords', 'line-numbers'],
       theme: "dark",
     }
   ]],
   themeConfig: {
+    navbar: [{
+      text: '1',
+      link: '/1.md',
+    }, {
+      text: '2',
+      children: [
+        {
+          text: '2-1',
+          link: '/2/1.md'
+        },
+        {
+          text: '2-2',
+          link: '/2/2.md'
+        }
+      ]
+    }],
     themePlugins: {
       prismjs: false,
     },
   },
   markdown: {
-    code: {
-      preWrapper: false,
-    },
+    code: false,
     customComponent: false,
   },
   bundler: process.env.DOCS_BUNDLER ?? (isProd ? '@vuepress/webpack' : '@vuepress/vite'),

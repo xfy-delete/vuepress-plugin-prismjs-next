@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
     "composite": false,
-    "declaration": false,
+    "declaration": true,
     "declarationMap": false,
+    "declarationDir": "./lib/dt",
     "lib": [
       "DOM",
       "ES2020"
     ],
-    "module": "es2020",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "newLine": "lf",
     "noEmitOnError": true,
@@ -22,6 +23,7 @@
     "strictNullChecks": true,
     "target": "ES2018",
     "outDir": "./lib",
+    "rootDir": "./src"
   },
   "include": [
     "./src"

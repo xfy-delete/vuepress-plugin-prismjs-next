@@ -1,16 +1,33 @@
 import config from 'prismjs/components';
 import getLoader from 'prismjs/dependencies';
+import rawLoadLanguages from 'prismjs/components/index';
 import Prism from 'prismjs';
-import rawLoadLanguages from './languages';
+import { App } from '@vuepress/core';
+import MarkdownIt from 'markdown-it';
+import uglifycss from 'uglifycss';
+import fs from 'fs';
 
-let globalPlugins = true;
+import mdPlugin from './md';
 
-const pluginList = {
+import { optionsType } from '..';
+
+rawLoadLanguages.silent = true;
+
+let globalPluginsLoad = true;
+
+const localPluginList = {
   autolinker: true,
   'inline-color': true,
   'diff-highlight': true,
   'data-uri-highlight': true,
 };
+
+const pluginList = {
+  treeview: true,
+  'highlight-keywords': true,
+};
+
+const pluginMap = {};
 
 const getPath = (type: string) => (name: string) => `prismjs/${config[type].meta.path.replace(/\{id\}/g, name)}`;
 
@@ -33,79 +50,78 @@ const getThemePath = (theme) => {
 
 const getPluginPath = getPath('plugins');
 
-function loadPlugins(plugins: Array<string> | undefined, isAsync?: boolean): Promise<boolean> {
-  if (!globalPlugins) {
-    return Promise.reject(new Error('重复注册插件'));
+function loadPlugins(md: MarkdownIt, plugins: Array<string> | undefined, app: App): undefined {
+  if (!globalPluginsLoad) {
+    return;
   }
-  globalPlugins = false;
-  if (isAsync) {
-    return new Promise((resolve, reject) => {
-      if (plugins) {
-        const importList: Array<Promise<any>> = [];
-        for (let index = 0; index < plugins.length;) {
-          const plugin = plugins[index];
-          importList.push(import(/* @vite-ignore */`./${plugin}`) as never);
-          index += 1;
-        }
-        Promise.all(importList).then(() => {
-          resolve(true);
-        }).catch((error) => {
-          reject(error);
-        });
-      } else {
-        resolve(true);
-      }
-    });
-  }
+  globalPluginsLoad = false;
   if (plugins) {
-    plugins.forEach((plugin) => {
+    for (let index = 0; index < plugins.length;) {
+      const plugin = plugins[index];
+      if (localPluginList[plugin]) {
+        import(`./prismjs/${plugin}`);
+      }
       if (pluginList[plugin]) {
-        import(/* @vite-ignore */`./${plugin}`);
+        import(`prismjs/plugins/${plugin}/prism-${plugin}`);
       }
-    });
+      pluginMap[plugin] = true;
+      index += 1;
+    }
   }
-  return Promise.resolve(true);
+  mdPlugin(md, pluginMap, app);
 }
 
-function loadCss(options: {
-  plugins?: Array<string>,
-  theme?: string
-}, _ctx: unknown) {
-  if (options && options.plugins) {
-    const pluginCss = getLoader(config, [...options.plugins]).getIds().reduce((deps: Array<string>, dep: string) => {
-      const temp = [];
-      if (isPlugin(dep) && !getNoCSS('plugins', dep)) {
-        temp.unshift(`${getPluginPath(dep)}.css` as never);
-      }
-      return [...deps, ...temp];
-    }, ([]));
-    pluginCss.forEach((p: string) => {
-      const cssPath = `node_modules/${p}`;
-      console.log(cssPath);
-    });
-  }
-  if (options && options.theme) {
-    const themeCssPath = `node_modules/${getThemePath(options.theme)}`;
-    console.log(themeCssPath);
-  }
-}
-
-function loadLanguages(languages: Array<string> | undefined): void {
+function loadLanguages(languages?: Array<string>) {
   const langsToLoad = languages?.filter((item) => !Prism.languages[item]);
   if (langsToLoad?.length) {
     rawLoadLanguages(langsToLoad);
   }
 }
 
-let globalTheme: string | undefined;
-
-function setTheme(theme: string | undefined) {
-  globalTheme = theme;
+function getPluginCssList(plugins: Array<string>): Array<string> {
+  const cssList = getLoader(config, [...plugins]).getIds().reduce((deps: Array<string>, dep: string) => {
+    const temp = [];
+    if (isPlugin(dep) && !getNoCSS('plugins', dep)) {
+      temp.unshift(`${getPluginPath(dep)}.css` as never);
+    }
+    return [...deps, ...temp];
+  }, ([]));
+  return cssList;
 }
 
+function getFileString(file: string): string {
+  const data = fs.readFileSync(`node_modules/${file}`);
+  return uglifycss.processString(data.toString(), { maxLineLen: 500, expandVars: true });
+}
+
+function loadCss(app: App, options?: optionsType): undefined {
+  let cssPathList: Array<string> = [];
+  let themeCssPath: string | undefined;
+  if (options && options.plugins) {
+    cssPathList = getPluginCssList(options.plugins);
+  }
+  if (options && options.theme) {
+    themeCssPath = getThemePath(options.theme);
+  }
+  const cssStrList: Array<string> = [];
+  if (themeCssPath) {
+    cssStrList.push(getFileString(themeCssPath));
+  }
+  cssPathList.forEach((file) => {
+    cssStrList.push(getFileString(file));
+  });
+  if (cssStrList.length === 0) {
+    return;
+  }
+  app.siteData.head = app.siteData.head || [];
+  cssStrList.forEach((cssStr) => {
+    if (cssStr && app.siteData) {
+      app.siteData.head.push(['style', { type: 'text/css' }, cssStr]);
+    }
+  });
+}
 export {
   loadPlugins,
   loadLanguages,
-  setTheme,
   loadCss,
 };

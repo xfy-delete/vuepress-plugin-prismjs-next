@@ -1,8 +1,8 @@
 {
-  "name": "markdown-prismjs-plugin",
+  "name": "vuepress-prism-plugin",
   "private": false,
-  "version": "0.0.1",
-  "description": "markdown prismjs自定义配置",
+  "version": "0.26.1",
+  "description": "vuepress prismjs自定义配置",
   "keywords": [
     "vuepress-plugin",
     "vuepress",
@@ -25,10 +25,15 @@
   },
   "license": "MIT",
   "author": "xfy520 <longzinziyan@gmail.com>",
-  "main": "./index.js",
-  "types": "./index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/dt/index.d.ts",
   "files": [
-    "lib"
+    "lib",
+    "LICENSE",
+    "package.json",
+    "README.md",
+    "tsconfig.json",
+    "tsconfig.esm.json"
   ],
   "publishConfig": {
     "access": "public"
@@ -41,7 +46,6 @@
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "@vuepress/core": "^2.0.0-beta.26",
-    "async": "^3.2.1",
     "eslint": "^8.0.1",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.25.2",

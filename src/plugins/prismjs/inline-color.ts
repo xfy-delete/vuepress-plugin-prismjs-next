@@ -1,5 +1,4 @@
 import Prism from 'prismjs';
-
 import 'prismjs/components/prism-css-extras';
 
 const HTML_TAG = /<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:'[^']*'|'[^']*'|[^\s''>=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/g;

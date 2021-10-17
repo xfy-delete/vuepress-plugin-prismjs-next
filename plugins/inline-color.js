@@ -2,7 +2,7 @@ require('prismjs/components/prism-css-extras');
 
 const HTML_TAG = /<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:'[^']*'|'[^']*'|[^\s''>=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/g;
 
-Prism.hooks.add('wrap', function (env) {
+Prism.hooks.add('wrap', (env) => {
   if (env.type === 'color' || env.classes.indexOf('color') >= 0) {
     const content = env.content;
     const rawText = content.split(HTML_TAG).join('');
@@ -17,10 +17,15 @@ Prism.hooks.add('wrap', function (env) {
 
 class Color {
   _h = 0;
+
   _s = 100;
+
   _v = 100;
+
   _a = 100;
+
   _f = null;
+
   v = null;
 
   constructor (color) {
@@ -45,9 +50,9 @@ class Color {
 
   format(color, _f) {
     if (!color) {
-      this._h = 0
-      this._s = 100
-      this._v = 100
+      this._h = 0;
+      this._s = 100;
+      this._v = 100;
       this.update();
     } else {
       const fromHsv = (h, s, v) => {
@@ -55,7 +60,7 @@ class Color {
         this._s = Math.max(0, Math.min(100, s));
         this._v = Math.max(0, Math.min(100, v));
         this.update();
-      }
+      };
       switch (_f) {
         case 'hex':
           this._hex(color, fromHsv);
@@ -103,7 +108,6 @@ class Color {
     const rgb = hexToRgb(hex);
     if (rgb === null) {
       this.v = null;
-      return;
     } else {
       const { r, g, b } = rgb;
       if (hex.length === 8) {
@@ -117,7 +121,9 @@ class Color {
   }
 
   update() {
-    const { _h, _s, _v, _a, _f } = this;
+    const {
+      _h, _s, _v, _a, _f,
+    } = this;
     const { r, g, b } = hsvToRgb(_h, _s, _v);
     this.v = `rgba(${r}, ${g}, ${b}, ${_a / 100})`;
   }
@@ -128,16 +134,16 @@ function strToArry(color, reg) {
     .replace(reg, '')
     .split(/\s|,/g)
     .filter((v) => v !== '')
-    .map((v, i) => (i > 2 ? parseFloat(v) : parseInt(v, 10)))
+    .map((v, i) => (i > 2 ? parseFloat(v) : parseInt(v, 10)));
 }
 
 function hslToHsv(h, s, l) {
-  s = s / 100;
-  l = l / 100;
+  s /= 100;
+  l /= 100;
   let smin = s;
   const lmin = Math.max(l, 0.01);
   l *= 2;
-  s *= l <= 1 ? l : 2 - l
+  s *= l <= 1 ? l : 2 - l;
   smin *= lmin <= 1 ? lmin : 2 - lmin;
   const v = (l + s) / 2;
   const sv = s === 0 ? (2 * smin) / (lmin + smin) : (2 * s) / (l + s);
@@ -145,7 +151,7 @@ function hslToHsv(h, s, l) {
     h,
     s: sv * 100,
     v: v * 100,
-  }
+  };
 }
 
 function hsvToRgb(h, s, v) {
@@ -165,7 +171,7 @@ function hsvToRgb(h, s, v) {
     r: Math.round(r * 255),
     g: Math.round(g * 255),
     b: Math.round(b * 255),
-  }
+  };
 }
 
 function rgbToHsv(r, g, b) {
@@ -173,7 +179,8 @@ function rgbToHsv(r, g, b) {
   g = limit(g, 255);
   b = limit(b, 255);
   const v = Math.max(r, g, b);
-  let h, s;
+  let h; let
+    s;
   const diff = v - Math.min(r, g, b);
   if (diff === 0) {
     h = s = 0;
@@ -185,25 +192,25 @@ function rgbToHsv(r, g, b) {
     switch (v) {
       case r: {
         h = diffc(b) - diffc(g);
-        break
+        break;
       }
       case g: {
         h = (1 / 3) + diffc(r) - diffc(b);
-        break
+        break;
       }
       case b: {
         h = (2 / 3) + diffc(g) - diffc(r);
-        break
+        break;
       }
     }
     h < 0 ? h += 1 : h > 1 ? h -= 1 : h;
   }
-  return { h: h * 360, s: s * 100, v: v * 100 }
+  return { h: h * 360, s: s * 100, v: v * 100 };
 }
 
 function limit(v, max) {
   v = typeof v === 'string' && v.indexOf('.') !== -1 && parseFloat(v) === 1 ? '100%' : v;
-  v = Math.min(max, Math.max(0, parseFloat(`${v}`)))
+  v = Math.min(max, Math.max(0, parseFloat(`${v}`)));
   v = typeof n === 'string' && n.indexOf('%') !== -1 ? parseInt(`${v * (max)}`, 10) / 100 : v;
   return Math.abs(v - (max)) < 0.000001 ? 1 : (v % (max)) / parseFloat(max);
 }
@@ -212,7 +219,8 @@ function hexToRgb(hex) {
   if (!/^[0-9a-fA-F]{3}$|^[0-9a-fA-F]{6}$|^[0-9a-fA-F]{8}$/.test(hex)) {
     return null;
   }
-  let r, g, b;
+  let r; let g; let
+    b;
   if (hex.length === 3) {
     r = parseInt(hex[0] + hex[0], 16);
     g = parseInt(hex[1] + hex[1], 16);
@@ -223,16 +231,16 @@ function hexToRgb(hex) {
     b = parseInt(hex.substring(4, 6), 16);
   }
   return {
-    r, g, b
+    r, g, b,
   };
 }
 
 function checkIsColor(color) {
   if (/^#/.test(color)) {
     return 'hex';
-  } else if (/^rgb\(/.test(color) || /^rgba\(/.test(color)) {
+  } if (/^rgb\(/.test(color) || /^rgba\(/.test(color)) {
     return 'rgb';
-  } else if (/^hsl\(/.test(color) || /^hsla\(/.test(color)) {
+  } if (/^hsl\(/.test(color) || /^hsla\(/.test(color)) {
     return 'hsl';
   }
   return null;
@@ -423,10 +431,9 @@ function wordToRgb(color) {
     darkorchid: 'rgba(153, 50, 204, 1)',
     darkorenge: 'rgba(218, 0, 14, 1)',
     darkslateblue: 'rgba(72, 61, 139, 1)',
-  }
+  };
   if (typeof color === 'string' && colors[color.toLowerCase()]) {
     return colors[color.toLowerCase()];
-  } else {
-    return null;
   }
+  return null;
 }
