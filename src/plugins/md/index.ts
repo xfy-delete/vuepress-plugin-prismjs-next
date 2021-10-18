@@ -1,10 +1,9 @@
-import { App } from '@vuepress/core';
 import MarkdownIt from 'markdown-it';
 import Token from 'markdown-it/lib/token';
 
 import lineNumbers from './line-numbers';
 
-export default (md: MarkdownIt, pluginMap: {}, app: App) => {
+export default (md: MarkdownIt, pluginMap: {}) => {
   md.renderer.rules.fence = (tokens: Array<Token>, idx: number, options, env, slf) => {
     const preClassList: Array<string> = [];
     const preStyleList: Array<string> = [];
@@ -17,13 +16,13 @@ export default (md: MarkdownIt, pluginMap: {}, app: App) => {
     const languageClass = `${md.options.langPrefix}${md.utils.escapeHtml(lang)}`;
     preClassList.push(languageClass);
     if (pluginMap['line-numbers']) {
-      lines = lineNumbers(token, info, token.content, preStyleList, app);
+      lines = lineNumbers(token, info, token.content, preStyleList);
       if (lines) {
         preClassList.push('line-numbers');
         preStyleList.push(`counter-reset: linenumber ${lines[0] - 1};`);
       }
     }
     const codeStr = `<code class='${languageClass}'>${html}${lines ? lines[1] : ''}</code>`;
-    return `<pre v-line-numbers class='${preClassList.join(' ')}' style='${preStyleList.join('')}'>${codeStr}</pre>`;
+    return `<pre v-pre v-line-numbers class='${preClassList.join(' ')}' style='${preStyleList.join('')}'>${codeStr}</pre>`;
   };
 };

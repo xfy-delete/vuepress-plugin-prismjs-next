@@ -1,27 +1,23 @@
 {
-  "name": "vuepress-prism-plugin",
+  "name": "vuepress-plugin-prismjs-next",
   "private": false,
-  "version": "0.26.1",
+  "version": "0.26.12",
   "description": "vuepress prismjs自定义配置",
   "keywords": [
-    "vuepress-plugin",
     "vuepress",
-    "plugin",
+    "vuepress-plugin",
+    "vuepress-plugin-prism",
     "prismjs",
-    "highlight",
-    "vuepress plugin prismjs",
-    "markdown",
-    "markdown-it",
-    "markdown-it plugin",
-    "markdown-it plugin prismjs"
+    "vuepress-plugin-prismjs",
+    "vuepress plugin prismjs"
   ],
-  "homepage": "https://github.com/xfy520/markdown-prismjs-plugin",
+  "homepage": "https://github.com/xfy520/vuepress-plugin-prismjs-next",
   "bugs": {
-    "url": "https://github.com/xfy520/markdown-prismjs-plugin/issues"
+    "url": "https://github.com/xfy520/vuepress-plugin-prismjs-next/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xfy520/markdown-prismjs-plugin.git"
+    "url": "git+https://github.com/xfy520/vuepress-plugin-prismjs-next.git"
   },
   "license": "MIT",
   "author": "xfy520 <longzinziyan@gmail.com>",
@@ -31,15 +27,13 @@
     "lib",
     "LICENSE",
     "package.json",
-    "README.md",
-    "tsconfig.json",
-    "tsconfig.esm.json"
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsc -module ES6 -outDir lib/esm"
+    "build": "tsc && tsc --project tsconfig.esm.json"
   },
   "devDependencies": {
     "@types/prismjs": "^1.16.6",

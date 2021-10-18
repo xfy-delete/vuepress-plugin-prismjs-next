@@ -4,11 +4,9 @@ const clientAppEnhanceFiles: ClientAppEnhance = ({ app, router }) => {
   app.directive('line-numbers', {
     mounted(el) {
       // @ts-ignore
-      if (typeof resizeLineNumbers !== 'undefined') {
-        console.log(el);
-        console.log(document);
+      if (typeof lineNumbers !== 'undefined') {
         // @ts-ignore
-        resizeLineNumbers([el]);
+        lineNumbers([el]);
       }
     },
   });
