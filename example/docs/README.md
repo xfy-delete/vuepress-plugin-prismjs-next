@@ -17,7 +17,7 @@
 <script>var _gaq = [['_setAccount', 'UA-33746269-1'], ['_trackPageview']];</script>
 <script src="https://www.google-analytics.com/ga.js" async></script>
 </head>
-<body class="language-none">
+<body class="language-none" style="color: red;">
 
 <header data-plugin-header="line-numbers"></header>
 

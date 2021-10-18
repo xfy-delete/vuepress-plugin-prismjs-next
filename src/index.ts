@@ -1,6 +1,7 @@
 import type { PluginFunction, App, PluginObject } from '@vuepress/core';
 import MarkdownIt from 'markdown-it';
 import Prism from 'prismjs';
+import fs from 'fs';
 import { path } from '@vuepress/utils';
 
 import {
@@ -39,6 +40,10 @@ export default (options: PluginFunction<optionsType>, app: App): PluginObject =>
       plugin(md, options as optionsType, app as App);
     },
     clientAppEnhanceFiles: app.env.isBuild ? path.resolve(__dirname, './clientAppEnhanceFiles.js') : path.resolve(__dirname, './esm/clientAppEnhanceFiles.js'),
+    onInitialized: (a) => {
+      console.log(path.resolve(__dirname, '@vuepress/theme-default/lib/client/code.scss'));
+      console.log(fs.readFileSync('../node_modules/@vuepress/theme-default/lib/client/code.scss'));
+    },
   };
 };
 

@@ -24,6 +24,6 @@ export default (md: MarkdownIt, pluginMap: {}, app: App) => {
       }
     }
     const codeStr = `<code class='${languageClass}'>${html}${lines ? lines[1] : ''}</code>`;
-    return `<pre class='${preClassList.join(' ')}' style='${preStyleList.join('')}'>${codeStr}</pre>`;
+    return `<pre v-line-numbers class='${preClassList.join(' ')}' style='${preStyleList.join('')}'>${codeStr}</pre>`;
   };
 };

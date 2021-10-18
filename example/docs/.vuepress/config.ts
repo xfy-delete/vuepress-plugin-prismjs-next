@@ -51,6 +51,9 @@ export default defineUserConfig<DefaultThemeOptions>({
     customComponent: false,
   },
   bundler: process.env.DOCS_BUNDLER ?? (isProd ? '@vuepress/webpack' : '@vuepress/vite'),
+  bundlerConfig: {
+
+  },
   dest: `${__dirname}../../../.dist`,
   temp: `${__dirname}../../../.temp`,
   cache: `${__dirname}../../../.cache`,

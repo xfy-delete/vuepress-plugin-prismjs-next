@@ -1,15 +1,16 @@
 import { ClientAppEnhance } from '@vuepress/client';
 
 const clientAppEnhanceFiles: ClientAppEnhance = ({ app, router }) => {
-  router.afterEach(() => {
-    router.isReady().then(() => {
+  app.directive('line-numbers', {
+    mounted(el) {
       // @ts-ignore
       if (typeof resizeLineNumbers !== 'undefined') {
+        console.log(el);
+        console.log(document);
         // @ts-ignore
-        // eslint-disable-next-line no-undef
-        resizeLineNumbers();
+        resizeLineNumbers([el]);
       }
-    });
+    },
   });
 };
 

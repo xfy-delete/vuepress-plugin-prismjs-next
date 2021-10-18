@@ -1,10 +1,9 @@
 import { App } from '@vuepress/core';
 import Token from 'markdown-it/lib/token';
 
-function resizeLineNumbers() {
+function resizeLineNumbers(spans) {
   const NEW_LINE_EXP = /\n(?!$)/g;
 
-  const preElements = Array.prototype.slice.call(document.querySelectorAll('pre.line-numbers[class*=language-]'));
   function getStyles(element: Element) {
     if (!element) {
       return null;
@@ -101,8 +100,10 @@ function resizeLineNumbers() {
         });
       }
     });
+    console.log(infos);
   }
-  resizeElements(preElements);
+  resizeElements(spans);
+
   let lastWidth: number;
   window.addEventListener('resize', () => {
     if (lastWidth === window.innerWidth) {
@@ -142,11 +143,11 @@ export default (token: Token, info: string, code: string, preStyleList: Array<st
   }
   if (/:pre-wrap|pre-line\b/.test(info)) {
     app.siteData.head = app.siteData.head || [];
-    app.siteData.head.push([
-      'script',
-      {},
-      resizeLineNumbers.toString(),
-    ]);
+    // app.siteData.head.push([
+    //   'script',
+    //   {},
+    //   resizeLineNumbers.toString(),
+    // ]);
   }
   return [startLine, spanStr];
 };
