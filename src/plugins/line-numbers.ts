@@ -1,6 +1,6 @@
 import { optionsType } from '..';
 
-function setStyle(info: string, styleList: Array<string>) {
+export function setWhiteSpaceStyle(info: string, styleList: Array<string>) {
   if (/:pre-wrap\b/.test(info)) {
     styleList.push('white-space: pre-wrap;');
   } else if (/:pre-line\b/.test(info)) {
@@ -10,12 +10,12 @@ function setStyle(info: string, styleList: Array<string>) {
 
 export default (info: string, code: string, preStyleList: Array<string>, codeStyleList: Array<string>, options: optionsType): [number, string] | null => {
   if (/:no-line-numbers\b/.test(info) || (typeof options.lineNumbers === 'boolean' && !options.lineNumbers)) {
-    setStyle(info, codeStyleList);
+    setWhiteSpaceStyle(info, codeStyleList);
     return null;
   }
   const lines = code.split('\n').slice(0, -1);
   if (typeof options.lineNumbers === 'number' && lines.length <= options.lineNumbers) {
-    setStyle(info, codeStyleList);
+    setWhiteSpaceStyle(info, codeStyleList);
     return null;
   }
   const match = info.match(/:([\d,-]+)/);
@@ -35,11 +35,11 @@ export default (info: string, code: string, preStyleList: Array<string>, codeSty
   if (/:pre-wrap|:pre-line\b/.test(info)) {
     spanStr += '<span class="line-numbers-sizer" style="display: none;"></span>';
   }
-  setStyle(info, preStyleList);
+  setWhiteSpaceStyle(info, preStyleList);
   return [startLine, spanStr];
 };
 
-export function lineNumbers(elements) {
+export function loadLineNumbers(elements) {
   const NEW_LINE_EXP = /\n(?!$)/g;
   function getStyles(element: Element) {
     if (!element) {

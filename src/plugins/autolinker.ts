@@ -1,44 +1,10 @@
 import Prism from 'prismjs';
+import 'prismjs/plugins/autolinker/prism-autolinker';
 
-const url = /\b([a-z]{3,7}:\/\/|tel:)[\w\-+%~/.:=&@]+(?:\?[\w\-+%~/.:=?&!$'()*,;@]*)?(?:#[\w\-+%~/.:#=?&!$'()*,;@]*)?/;
-const email = /\b\S+@[\w.]+[a-z]{2}/;
 const linkMd = /\[([^\]]+)\]\(([^)]+)\)/;
 
-const candidates = ['comment', 'doc-comment', 'url', 'attr-value', 'string'];
-
-Prism.plugins.autolinker = {
-  processGrammar(grammar) {
-    if (!grammar || grammar['url-link']) {
-      return;
-    }
-    // @ts-ignore
-    Prism.languages.DFS(grammar, function (this: any, key, def, type) {
-      if (candidates.indexOf(type) > -1 && !Array.isArray(def)) {
-        if (!def.pattern) {
-          this[key] = {
-            pattern: def,
-          };
-          def = this[key];
-        }
-        def.inside = def.inside || {};
-        if (type === 'comment' || type === 'doc-comment') {
-          def.inside['md-link'] = linkMd;
-        }
-        if (type === 'attr-value') {
-          Prism.languages.insertBefore('inside', 'punctuation', { 'url-link': url }, def);
-        } else {
-          def.inside['url-link'] = url;
-        }
-        def.inside['email-link'] = email;
-      }
-    });
-    grammar['url-link'] = url;
-    grammar['email-link'] = email;
-  },
-};
-
 Prism.hooks.add('before-tokenize', (env) => {
-  Prism.plugins.autolinker.processGrammar(env.grammar);
+  Prism.hooks.run('before-highlight', env);
 });
 
 Prism.hooks.add('wrap', (env) => {

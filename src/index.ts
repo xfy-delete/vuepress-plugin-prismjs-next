@@ -17,6 +17,12 @@ type optionsType = {
 }
 
 const resizeStr = `
+if (typeof TOOLBAR_CALLBACKS === 'undefined') {
+  TOOLBAR_CALLBACKS = [];
+}
+if (typeof TOOLBAR_MAP === 'undefined') {
+  TOOLBAR_MAP = [];
+}
 window.addEventListener('resize', () => {
   if (typeof lineNumbers !== 'undefined') {
     lineNumbers(Array.prototype.slice.call(document.querySelectorAll('pre.line-numbers[class*=language-]')));
@@ -44,10 +50,6 @@ export default (options: optionsType, app: App): PluginObject => {
   console.log('\x1B[36m%s\x1B[0m', 'vuepress plugin loading');
   return {
     name: 'vuepress-plugin-prismjs-next',
-    define: {
-      TOOLBAR_CALLBACKS: [],
-      TOOLBAR_MAP: {},
-    },
     extendsMarkdown(md) {
       options = {
         languages: ['java', 'css', 'javascript', 'typescript', 'html', 'json', 'shell', 'yaml', 'diff'],

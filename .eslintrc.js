@@ -17,6 +17,7 @@ module.exports = {
   rules: {
     'no-shadow': 'off',
     'consistent-return': 'off',
+    'guard-for-in': 'off',
     'no-undef': 'off',
     'no-loop-func': 'off',
     'no-empty': 'off',

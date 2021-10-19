@@ -11,11 +11,14 @@ import fs from 'fs';
 import { path } from '@vuepress/utils';
 import Token from 'markdown-it/lib/token';
 
-import lineNumbers from './line-numbers';
+import lineNumbers, { loadLineNumbers, setWhiteSpaceStyle } from './line-numbers';
 import lineHighlight from './line-highlight';
+import matchBraces from './match-braces';
 import { optionsType } from '..';
 import { myToolbar, registerButton } from './toolbar';
 import showLanguage from './show-language';
+import copyToClipboard from './copy-to-clipboard';
+import downloadButton from './download-button';
 
 rawLoadLanguages.silent = true;
 
@@ -24,12 +27,14 @@ let globalPluginsLoad = true;
 const localPluginList = {
   autolinker: true,
   'inline-color': true,
-  'diff-highlight': true,
   'data-uri-highlight': true,
+  'show-invisibles': true,
+  'normalize-whitespace': true,
 };
 
 const pluginList = {
   treeview: true,
+  'diff-highlight': true,
   'highlight-keywords': true,
 };
 
@@ -68,9 +73,8 @@ function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string
         preClassList.push('line-numbers');
         preStyleList.push(`counter-reset: linenumber ${lines[0] - 1};`);
       }
-    }
-    if (pluginMap['line-highlight']) {
-      preClassList.push('line-highlight');
+    } else {
+      setWhiteSpaceStyle(info, codeStyleList);
     }
     if (pluginMap.toolbar) {
       preClassList.push('my-toolbar');
@@ -83,7 +87,8 @@ function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string
     if (useVPre) {
       codeStr = `<code v-pre${codeStr.slice('<code'.length)}`;
     }
-    return `<pre v-pre-load data-line='1,3-4,42' lang=${lang} class='${preClassList.join(' ')} linkable-line-numbers' style='${preStyleList.join('')}'>${codeStr}</pre>`;
+    const match = info.match(/{([\d,-]+)}/);
+    return `<pre v-pre-load ${match ? `data-line=${match[1]}` : ''} lang=${lang} class='match-braces rainbow-braces ${preClassList.join(' ')}' style='${preStyleList.join('')}'>${codeStr}</pre>`;
   };
 }
 
@@ -133,17 +138,26 @@ function loadPlugins(md: MarkdownIt, app: App, options: optionsType): undefined 
     }
   }
   if (pluginMap['line-numbers']) {
-    setHead(app, 'script', {}, lineNumbers.toString());
+    setHead(app, 'script', {}, loadLineNumbers.toString());
   }
   if (pluginMap['line-highlight']) {
     setHead(app, 'script', {}, lineHighlight.toString());
   }
+  if (pluginMap['match-braces']) {
+    setHead(app, 'script', {}, matchBraces.toString());
+  }
   if (pluginMap.toolbar) {
-    setHead(app, 'script', {}, registerButton);
+    setHead(app, 'script', {}, registerButton.toString());
     setHead(app, 'script', {}, myToolbar.toString());
   }
   if (pluginMap.toolbar && pluginMap['show-language']) {
-    setHead(app, 'script', {}, showLanguage.toString());
+    setHead(app, 'script', {}, showLanguage);
+  }
+  if (pluginMap.toolbar && pluginMap['copy-to-clipboard']) {
+    setHead(app, 'script', {}, copyToClipboard);
+  }
+  if (pluginMap.toolbar && pluginMap['download-button']) {
+    setHead(app, 'script', {}, downloadButton);
   }
   mdPlugin(md, options, pluginMap);
 }
@@ -178,6 +192,10 @@ function removeDefaultCss() {
   }
   fs.writeFileSync(path.resolve(__dirname, path.resolve(__dirname, codeScssPath)), `
 @import '_variables';
+.copy-to-clipboard-button {
+  margin-left: 0.3em;
+  cursor: pointer;
+}
 .theme-default-content {
   pre,
   pre[class*='language-'] {
@@ -196,8 +214,6 @@ function removeDefaultCss() {
     font-family: var(--font-family-code);
   }
 }
-
-
 @each $lang in $codeLang {
   div[class*='language-'].ext-#{$lang} {
     &:before {
@@ -205,7 +221,6 @@ function removeDefaultCss() {
     }
   }
 }
-
 @media (max-width: $MQMobileNarrow) {
   .theme-default-content {
     div[class*='language-'] {

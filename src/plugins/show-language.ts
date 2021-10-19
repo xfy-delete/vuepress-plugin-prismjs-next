@@ -1,4 +1,26 @@
-export default function showLanguage(preEle: any) {
+export default `(function () {
+  // @ts-ignore
+  if (typeof registerButton !== 'undefined') {
+    // @ts-ignore
+    registerButton('show-language', (preEle) => {
+      if (!preEle || !/pre/i.test(preEle.nodeName)) {
+        return;
+      }
+      function guessTitle(id) {
+        if (!id) {
+          return id;
+        }
+        return (id.substring(0, 1).toUpperCase() + id.substring(1)).replace(/s(?=cript)/, 'S');
+      }
+      const language = Languages[preEle.lang] || guessTitle(preEle.lang);
+      if (!language) {
+        return;
+      }
+      const element = document.createElement('span');
+      element.textContent = language;
+      return element;
+    });
+  }
   const Languages = {
     none: 'Plain text',
     plain: 'Plain text',
@@ -246,29 +268,4 @@ export default function showLanguage(preEle: any) {
     yml: 'YAML',
     yang: 'YANG',
   };
-  // @ts-ignore
-  if (typeof registerButton !== 'undefined') {
-    // @ts-ignore
-    console.log(registerButton);
-    // @ts-ignore
-    registerButton('show-language', () => {
-      if (!preEle || !/pre/i.test(preEle.nodeName)) {
-        return;
-      }
-      function guessTitle(id) {
-        if (!id) {
-          return id;
-        }
-        return (id.substring(0, 1).toUpperCase() + id.substring(1)).replace(/s(?=cript)/, 'S');
-      }
-      const language = Languages[preEle.lang] || guessTitle(preEle.lang);
-      if (!language) {
-        return;
-      }
-      const element = document.createElement('span');
-      element.textContent = language;
-      console.log(element);
-      return element;
-    });
-  }
-}
+}());`;
