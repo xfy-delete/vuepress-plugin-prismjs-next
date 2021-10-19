@@ -1,4 +1,4 @@
-import type { PluginFunction, App, PluginObject } from '@vuepress/core';
+import type { App, PluginObject } from '@vuepress/core';
 import MarkdownIt from 'markdown-it';
 import Prism from 'prismjs';
 import { path } from '@vuepress/utils';
@@ -11,26 +11,26 @@ type optionsType = {
   languages?: Array<string>,
   plugins?: Array<string>,
   theme?: string,
-  css?: boolean
+  css?: boolean,
+  vPre?: true | boolean,
+  lineNumbers?: number | boolean
 }
 
 const resizeStr = `
 window.addEventListener('resize', () => {
-  // @ts-ignore
   if (typeof lineNumbers !== 'undefined') {
-    // @ts-ignore
     lineNumbers(Array.prototype.slice.call(document.querySelectorAll('pre.line-numbers[class*=language-]')));
+    lineNumbers(Array.prototype.slice.call(document.querySelectorAll('pre.line-highlight[class*=language-]')));
   }
 });
 `;
 
 const plugin = (md: MarkdownIt, options: optionsType, app: App) => {
   if (options) {
-    loadPlugins(md, options.plugins, app);
+    loadPlugins(md, app, options);
     loadLanguages(options.languages);
   }
   loadCss(app, options);
-  setHead(app, 'script', {}, '');
   md.options.highlight = (code, lang) => {
     const prismLang = Prism.languages[lang];
     const html = prismLang
@@ -40,13 +40,24 @@ const plugin = (md: MarkdownIt, options: optionsType, app: App) => {
   };
 };
 
-export default (options: PluginFunction<optionsType>, app: App): PluginObject => {
+export default (options: optionsType, app: App): PluginObject => {
   console.log('\x1B[36m%s\x1B[0m', 'vuepress plugin loading');
   return {
     name: 'vuepress-plugin-prismjs-next',
+    define: {
+      TOOLBAR_CALLBACKS: [],
+      TOOLBAR_MAP: {},
+    },
     extendsMarkdown(md) {
-      app.siteData.head = app.siteData.head || [];
-      app.siteData.head.push(['script', { }, resizeStr]);
+      options = {
+        languages: ['java', 'css', 'javascript', 'typescript', 'html', 'json', 'shell', 'yaml', 'diff'],
+        plugins: [],
+        css: true,
+        vPre: true,
+        lineNumbers: 3,
+        ...(options || {}),
+      };
+      setHead(app, 'script', {}, resizeStr);
       plugin(md, options as optionsType, app as App);
     },
     clientAppEnhanceFiles: app.env.isBuild ? path.resolve(__dirname, './clientAppEnhanceFiles.js') : path.resolve(__dirname, './esm/clientAppEnhanceFiles.js'),

@@ -3,17 +3,19 @@ import getLoader from 'prismjs/dependencies';
 import rawLoadLanguages from 'prismjs/components/index';
 import Prism from 'prismjs';
 import {
-  App, HeadAttrsConfig, HeadTagEmpty, HeadTagNonEmpty,
+  App, HeadAttrsConfig, HeadTagNonEmpty,
 } from '@vuepress/core';
 import MarkdownIt from 'markdown-it';
 import uglifycss from 'uglifycss';
 import fs from 'fs';
 import { path } from '@vuepress/utils';
+import Token from 'markdown-it/lib/token';
 
-import mdPlugin from './md';
-import { lineNumbers } from './md/line-numbers';
-
+import lineNumbers from './line-numbers';
+import lineHighlight from './line-highlight';
 import { optionsType } from '..';
+import { myToolbar, registerButton } from './toolbar';
+import showLanguage from './show-language';
 
 rawLoadLanguages.silent = true;
 
@@ -31,7 +33,59 @@ const pluginList = {
   'highlight-keywords': true,
 };
 
-const pluginMap = {};
+const pluginMap: {
+  [key: string]: boolean
+} = {};
+
+function isVPre(info: string): boolean | null {
+  if (/:v-pre\b/.test(info)) {
+    return true;
+  }
+  if (/:no-v-pre\b/.test(info)) {
+    return false;
+  }
+  return null;
+}
+
+function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string]: boolean}) {
+  md.renderer.rules.fence = (tokens: Array<Token>, idx: number, opts: MarkdownIt.Options, _env, _slf) => {
+    const preClassList: Array<string> = [];
+    const preStyleList: Array<string> = [];
+    const codeStyleList: Array<string> = [];
+    let lines: [number, string] | null = null;
+    const token = tokens[idx];
+    if (token.tag !== 'code') {
+      return token.content;
+    }
+    const info = token.info ? md.utils.unescapeAll(token.info).trim() : '';
+    const lang = info.match(/^([a-zA-Z]+)/)?.[1] || 'text';
+    const html = opts.highlight?.(token.content, lang, '') || md.utils.escapeHtml(token.content);
+    const languageClass = `${md.options.langPrefix}${md.utils.escapeHtml(lang)}`;
+    preClassList.push(languageClass);
+    if (pluginMap['line-numbers']) {
+      lines = lineNumbers(info, token.content, preStyleList, codeStyleList, options);
+      if (lines) {
+        preClassList.push('line-numbers');
+        preStyleList.push(`counter-reset: linenumber ${lines[0] - 1};`);
+      }
+    }
+    if (pluginMap['line-highlight']) {
+      preClassList.push('line-highlight');
+    }
+    if (pluginMap.toolbar) {
+      preClassList.push('my-toolbar');
+    }
+    if (pluginMap.toolbar && pluginMap['show-language']) {
+      preClassList.push('show-language');
+    }
+    let codeStr = `<code class='${languageClass}' style='${codeStyleList.join('')}'>${html}${lines ? lines[1] : ''}</code>`;
+    const useVPre = isVPre(info) ?? options.vPre;
+    if (useVPre) {
+      codeStr = `<code v-pre${codeStr.slice('<code'.length)}`;
+    }
+    return `<pre v-pre-load data-line='1,3-4,42' lang=${lang} class='${preClassList.join(' ')} linkable-line-numbers' style='${preStyleList.join('')}'>${codeStr}</pre>`;
+  };
+}
 
 const getPath = (type: string) => (name: string) => `prismjs/${config[type].meta.path.replace(/\{id\}/g, name)}`;
 
@@ -59,16 +113,17 @@ const getThemePath = (theme) => {
 
 const getPluginPath = getPath('plugins');
 
-function loadPlugins(md: MarkdownIt, plugins: Array<string> | undefined, app: App): undefined {
+function loadPlugins(md: MarkdownIt, app: App, options: optionsType): undefined {
   if (!globalPluginsLoad) {
     return;
   }
+  const plugins = options?.plugins;
   globalPluginsLoad = false;
   if (plugins) {
     for (let index = 0; index < plugins.length;) {
       const plugin = plugins[index];
       if (localPluginList[plugin]) {
-        import(`./prismjs/${plugin}`);
+        import(`./${plugin}`);
       }
       if (pluginList[plugin]) {
         import(`prismjs/plugins/${plugin}/prism-${plugin}`);
@@ -80,7 +135,17 @@ function loadPlugins(md: MarkdownIt, plugins: Array<string> | undefined, app: Ap
   if (pluginMap['line-numbers']) {
     setHead(app, 'script', {}, lineNumbers.toString());
   }
-  mdPlugin(md, pluginMap);
+  if (pluginMap['line-highlight']) {
+    setHead(app, 'script', {}, lineHighlight.toString());
+  }
+  if (pluginMap.toolbar) {
+    setHead(app, 'script', {}, registerButton);
+    setHead(app, 'script', {}, myToolbar.toString());
+  }
+  if (pluginMap.toolbar && pluginMap['show-language']) {
+    setHead(app, 'script', {}, showLanguage.toString());
+  }
+  mdPlugin(md, options, pluginMap);
 }
 
 function loadLanguages(languages?: Array<string>) {
@@ -113,49 +178,10 @@ function removeDefaultCss() {
   }
   fs.writeFileSync(path.resolve(__dirname, path.resolve(__dirname, codeScssPath)), `
 @import '_variables';
-
-code[class*='language-'],
-pre[class*='language-'] {
-  background: none;
-  font-family: var(--font-family-code);
-  font-size: 1em;
-  text-align: left;
-  white-space: pre;
-  word-spacing: normal;
-  word-break: normal;
-  word-wrap: normal;
-  line-height: 1.5;
-
-  -moz-tab-size: 4;
-  -o-tab-size: 4;
-  tab-size: 4;
-
-  -webkit-hyphens: none;
-  -moz-hyphens: none;
-  -ms-hyphens: none;
-  hyphens: none;
-}
-
-pre[class*='language-'] {
-  padding: 1em;
-  margin: 0.5em 0;
-  overflow: auto;
-}
-
-:not(pre) > code[class*='language-'] {
-  padding: 0.1em;
-  border-radius: 0.3em;
-  white-space: normal;
-}
-
-
 .theme-default-content {
   pre,
   pre[class*='language-'] {
-    line-height: 1.4;
-    padding: 1.25rem 1.5rem;
     margin: 0.85rem 0;
-    border-radius: 6px;
     overflow: auto;
 
     code {

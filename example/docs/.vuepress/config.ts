@@ -18,10 +18,11 @@ export default defineUserConfig<DefaultThemeOptions>({
     }
   `], ['script', { type: 'text/javascript', src: 'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js' }]],
   plugins: [[
-    'vuepress-plugin-prismjs-next',
+    resolve(__dirname, '../../../lib'),
     {
-      languages: ['java', 'css', 'javascript', 'typescript', 'html', 'json', 'shell', 'yaml', 'diff'],
-      plugins: ['inline-color', 'autolinker', 'data-uri-highlight', 'diff-highlight', 'treeview', 'highlight-keywords', 'line-numbers'],
+      languages: ['less', 'css', 'javascript', 'sass', 'html', 'scss', 'stylus', 'yaml', 'diff'],
+      plugins: ['inline-color', 'autolinker', 'data-uri-highlight', 'diff-highlight', 'treeview',
+      'highlight-keywords', 'line-numbers', 'line-highlight', 'toolbar', 'show-language'],
       theme: "dark",
     }
   ]],
@@ -52,6 +53,7 @@ export default defineUserConfig<DefaultThemeOptions>({
   },
   bundler: process.env.DOCS_BUNDLER ?? (isProd ? '@vuepress/webpack' : '@vuepress/vite'),
   bundlerConfig: {
+
   },
   dest: `${__dirname}../../../.dist`,
   temp: `${__dirname}../../../.temp`,
