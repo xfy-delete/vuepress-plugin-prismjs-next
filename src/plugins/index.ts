@@ -21,6 +21,7 @@ import copyToClipboard from './copy-to-clipboard';
 import downloadButton from './download-button';
 import newCode from '../new_code';
 import oldCode from '../old_code';
+import inlineStyle from './browser/inline-style';
 
 rawLoadLanguages.silent = true;
 
@@ -28,7 +29,7 @@ let globalPluginsLoad = true;
 
 const localPluginList = {
   autolinker: true,
-  'inline-color': true,
+  'inline-style': true,
   'data-uri-highlight': true,
   'show-invisibles': true,
   'normalize-whitespace': true,
@@ -139,6 +140,9 @@ function loadPlugins(md: MarkdownIt, app: App, options: optionsType): undefined 
       pluginMap[plugin] = true;
       index += 1;
     }
+  }
+  if (pluginMap['inline-style']) {
+    setHead(app, 'style', { type: 'text/css' }, inlineStyle);
   }
   if (pluginMap['line-numbers']) {
     setHead(app, 'script', {}, loadLineNumbers.toString());

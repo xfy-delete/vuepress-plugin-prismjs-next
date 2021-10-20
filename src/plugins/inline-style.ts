@@ -1,5 +1,6 @@
 import Prism from 'prismjs';
 import 'prismjs/components/prism-css-extras';
+import beforeTokenize from './utils/previewers';
 
 const HTML_TAG = /<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:'[^']*'|'[^']*'|[^\s''>=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/g;
 
@@ -405,9 +406,17 @@ class Color {
   }
 }
 
+Prism.hooks.add('before-tokenize', (env) => {
+  if (env.previewers) {
+    return;
+  }
+  env.previewers = true;
+  beforeTokenize(env);
+});
+
 Prism.hooks.add('wrap', (env) => {
-  if (env.type === 'color' || env.classes.indexOf('color') >= 0) {
-    const { content } = env;
+  const { content } = env;
+  if (env.type === 'color' || env.type === 'hexcode' || env.classes.indexOf('color') >= 0) {
     const rawText = content.split(HTML_TAG).join('');
     const color = new Color(rawText);
     if (!color.v) {
@@ -415,5 +424,16 @@ Prism.hooks.add('wrap', (env) => {
     }
     const previewElement = `<span class='inline-color-wrapper'><span class='inline-color' style='background-color:${color.v}'></span></span>`;
     env.content = previewElement + content;
+  }
+  if (env.type === 'gradient' && env.classes.indexOf('gradient') >= 0) {
+    let gradient = content.split(HTML_TAG).join('');
+    if (gradient) {
+      gradient = gradient.replace('-moz-', '').replace('-ms-', '').replace('-o-', '');
+    }
+    const previewElement = `<span class='inline-color-wrapper'><span class='inline-color' style='background-image:${gradient}'></span></span>`;
+    env.content = previewElement + content;
+  }
+  if (env.type === 'angle' && env.classes.indexOf('angle') >= 0) {
+    console.log(content);
   }
 });

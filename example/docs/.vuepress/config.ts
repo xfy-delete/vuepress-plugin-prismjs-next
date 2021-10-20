@@ -21,7 +21,10 @@ export default defineUserConfig<DefaultThemeOptions>({
     resolve(__dirname, '../../../lib'),
     {
       languages: ['less', 'css', 'javascript', 'sass', 'html', 'scss', 'stylus', 'yaml', 'diff'],
-      plugins: ['inline-color', 'previewers',],
+      plugins: ['inline-style', 'previewers'
+      // autolinker', 'data-uri-highlight', 'diff-highlight', 'treeview', 'show-invisibles', 'match-braces',
+      // 'highlight-keywords', 'line-numbers', 'line-highlight', 'toolbar', 'show-language', 'copy-to-clipboard', 'download-button', 'previewers',
+    ],
     }
   ]],
   themeConfig: {

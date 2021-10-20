@@ -293,7 +293,7 @@ Previewer.prototype.check = function (token) {
 };
 
 Previewer.prototype.mouseout = function () {
-  this._token.removeEventListener('mouseout', this._mouseout, false);
+  // this._token.removeEventListener('mouseout', this._mouseout, false);
   this._token = null;
   this.hide();
 };
@@ -307,7 +307,7 @@ Previewer.prototype.show = function () {
   }
 
   if (this.updater.call(this._elt, this._token.textContent)) {
-    this._token.addEventListener('mouseout', this._mouseout, false);
+    // this._token.addEventListener('mouseout', this._mouseout, false);
 
     const offset = getOffset(this._token);
     this._elt.classList.add('active');
@@ -335,22 +335,6 @@ Previewer.prototype.hide = function () {
 Previewer.byLanguages = {};
 
 Previewer.byType = {};
-
-Previewer.initEvents = function (elt, lang) {
-  let previewers = [];
-  if (Previewer.byLanguages[lang]) {
-    previewers = previewers.concat(Previewer.byLanguages[lang]);
-  }
-  if (Previewer.byLanguages['*']) {
-    previewers = previewers.concat(Previewer.byLanguages['*']);
-  }
-  elt.addEventListener('mouseover', (e) => {
-    const target = e.target;
-    previewers.forEach((previewer) => {
-      previewer.check(target);
-    });
-  }, false);
-};
 
 for (const previewer in previewers) {
   previewers[previewer].create();
