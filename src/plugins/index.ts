@@ -19,6 +19,8 @@ import { myToolbar, registerButton } from './toolbar';
 import showLanguage from './show-language';
 import copyToClipboard from './copy-to-clipboard';
 import downloadButton from './download-button';
+import newCode from '../new_code';
+import oldCode from '../old_code';
 
 rawLoadLanguages.silent = true;
 
@@ -30,6 +32,7 @@ const localPluginList = {
   'data-uri-highlight': true,
   'show-invisibles': true,
   'normalize-whitespace': true,
+  previewers: true,
 };
 
 const pluginList = {
@@ -53,7 +56,7 @@ function isVPre(info: string): boolean | null {
 }
 
 function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string]: boolean}) {
-  md.renderer.rules.fence = (tokens: Array<Token>, idx: number, opts: MarkdownIt.Options, _env, _slf) => {
+  md.renderer.rules.fence = (tokens: Array<Token>, idx: number, opts: MarkdownIt.Options) => {
     const preClassList: Array<string> = [];
     const preStyleList: Array<string> = [];
     const codeStyleList: Array<string> = [];
@@ -159,6 +162,10 @@ function loadPlugins(md: MarkdownIt, app: App, options: optionsType): undefined 
   if (pluginMap.toolbar && pluginMap['download-button']) {
     setHead(app, 'script', {}, downloadButton);
   }
+  if (pluginMap.previewers) {
+    setHead(app, 'script', {}, fs.readFileSync(path.resolve(__dirname, './previewers/index.js')).toString()
+      .replace('exports.default = previewers;', '').replace('Object.defineProperty(exports, "__esModule", { value: true });', ''));
+  }
   mdPlugin(md, options, pluginMap);
 }
 
@@ -185,50 +192,12 @@ function getFileString(file: string): string {
   return uglifycss.processString(data.toString(), { maxLineLen: 500, expandVars: true });
 }
 
-function removeDefaultCss() {
+function defaultCss(scssStr: string) {
   let codeScssPath = '../../../@vuepress/theme-default/lib/client/styles/code.scss';
   if (process.env.VUEPRESS_PLUGIN_PRISMJS_NEXT && process.env.VUEPRESS_PLUGIN_PRISMJS_NEXT.indexOf('true') !== -1) {
     codeScssPath = '../../example/node_modules/@vuepress/theme-default/lib/client/styles/code.scss';
   }
-  fs.writeFileSync(path.resolve(__dirname, path.resolve(__dirname, codeScssPath)), `
-@import '_variables';
-.copy-to-clipboard-button {
-  margin-left: 0.3em;
-  cursor: pointer;
-}
-.theme-default-content {
-  pre,
-  pre[class*='language-'] {
-    margin: 0.85rem 0;
-    overflow: auto;
-
-    code {
-      padding: 0;
-      border-radius: 0;
-      -webkit-font-smoothing: auto;
-      -moz-osx-font-smoothing: auto;
-    }
-  }
-
-  .line-number {
-    font-family: var(--font-family-code);
-  }
-}
-@each $lang in $codeLang {
-  div[class*='language-'].ext-#{$lang} {
-    &:before {
-      content: '' + $lang;
-    }
-  }
-}
-@media (max-width: $MQMobileNarrow) {
-  .theme-default-content {
-    div[class*='language-'] {
-      margin: 0.85rem -1.5rem;
-      border-radius: 0;
-    }
-  }
-}`);
+  fs.writeFileSync(path.resolve(__dirname, path.resolve(__dirname, codeScssPath)), scssStr);
 }
 
 function loadCss(app: App, options?: optionsType): undefined {
@@ -243,7 +212,9 @@ function loadCss(app: App, options?: optionsType): undefined {
   const cssStrList: Array<string> = [];
   if (themeCssPath) {
     cssStrList.push(getFileString(themeCssPath));
-    removeDefaultCss();
+    defaultCss(newCode);
+  } else {
+    defaultCss(oldCode);
   }
   cssPathList.forEach((file) => {
     cssStrList.push(getFileString(file));

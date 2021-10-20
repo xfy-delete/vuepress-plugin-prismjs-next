@@ -27,6 +27,11 @@ const clientAppEnhanceFiles: ClientAppEnhance = ({ app, router }) => {
         // @ts-ignore
         matchBraces(el);
       }
+      // @ts-ignore
+      if (typeof PreviewerInitEvents !== 'undefined') {
+        // @ts-ignore
+        PreviewerInitEvents(el, el.getAttribute('lang'));
+      }
     },
   });
 };

@@ -15,7 +15,9 @@ module.exports = {
     '@typescript-eslint',
   ],
   rules: {
+    'no-new': 'off',
     'no-shadow': 'off',
+    'no-return-assign': 'off',
     'consistent-return': 'off',
     'guard-for-in': 'off',
     'no-undef': 'off',
