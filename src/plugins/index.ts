@@ -21,7 +21,7 @@ import copyToClipboard from './copy-to-clipboard';
 import downloadButton from './download-button';
 import newCode from '../new_code';
 import oldCode from '../old_code';
-import inlineStyle from './browser/inline-style';
+import inlineStyle from './style/inline-style';
 
 rawLoadLanguages.silent = true;
 
@@ -29,11 +29,14 @@ let globalPluginsLoad = true;
 
 const localPluginList = {
   autolinker: true,
-  'inline-style': true,
   'data-uri-highlight': true,
   'show-invisibles': true,
   'normalize-whitespace': true,
   previewers: true,
+};
+
+const nodePlugins = {
+  'inline-style': true,
 };
 
 const pluginList = {
@@ -131,6 +134,9 @@ function loadPlugins(md: MarkdownIt, app: App, options: optionsType): undefined 
   if (plugins) {
     for (let index = 0; index < plugins.length;) {
       const plugin = plugins[index];
+      if (nodePlugins[plugin]) {
+        import(path.resolve(__dirname, `./node/${plugin}`));
+      }
       if (localPluginList[plugin]) {
         import(`./${plugin}`);
       }
@@ -151,7 +157,8 @@ function loadPlugins(md: MarkdownIt, app: App, options: optionsType): undefined 
     setHead(app, 'script', {}, lineHighlight.toString());
   }
   if (pluginMap['match-braces']) {
-    setHead(app, 'script', {}, matchBraces.toString());
+    // setHead(app, 'script', {}, matchBraces.toString());
+    setHead(app, 'script', {}, fs.readFileSync(path.resolve(__dirname, '../browser/match-braces.global.js')).toString());
   }
   if (pluginMap.toolbar) {
     setHead(app, 'script', {}, registerButton.toString());
@@ -167,8 +174,7 @@ function loadPlugins(md: MarkdownIt, app: App, options: optionsType): undefined 
     setHead(app, 'script', {}, downloadButton);
   }
   if (pluginMap.previewers) {
-    setHead(app, 'script', {}, fs.readFileSync(path.resolve(__dirname, './previewers/index.js')).toString()
-      .replace('exports.default = previewers;', '').replace('Object.defineProperty(exports, "__esModule", { value: true });', ''));
+    setHead(app, 'script', {}, fs.readFileSync(path.resolve(__dirname, '../browser/previewers.global.js')).toString());
   }
   mdPlugin(md, options, pluginMap);
 }

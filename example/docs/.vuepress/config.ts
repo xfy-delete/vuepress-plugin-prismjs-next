@@ -16,12 +16,12 @@ export default defineUserConfig<DefaultThemeOptions>({
     span[class*="token keyword keyword-"] {
       color: #f92672 !important;
     }
-  `], ['script', { type: 'text/javascript', src: 'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js' }]],
+  `]],
   plugins: [[
     resolve(__dirname, '../../../lib'),
     {
       languages: ['less', 'css', 'javascript', 'sass', 'html', 'scss', 'stylus', 'yaml', 'diff'],
-      plugins: ['inline-style', 'previewers'
+      plugins: ['inline-style'
       // autolinker', 'data-uri-highlight', 'diff-highlight', 'treeview', 'show-invisibles', 'match-braces',
       // 'highlight-keywords', 'line-numbers', 'line-highlight', 'toolbar', 'show-language', 'copy-to-clipboard', 'download-button', 'previewers',
     ],

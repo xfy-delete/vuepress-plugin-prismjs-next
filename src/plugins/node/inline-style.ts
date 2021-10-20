@@ -1,6 +1,8 @@
 import Prism from 'prismjs';
 import 'prismjs/components/prism-css-extras';
-import beforeTokenize from './utils/previewers';
+import convertToW3CGradient from '../utils/convertToW3CGradient';
+import beforeTokenize from '../utils/previewers';
+import percentageFun from '../utils/percentage';
 
 const HTML_TAG = /<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:'[^']*'|'[^']*'|[^\s''>=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/g;
 
@@ -422,18 +424,23 @@ Prism.hooks.add('wrap', (env) => {
     if (!color.v) {
       return;
     }
-    const previewElement = `<span class='inline-color-wrapper'><span class='inline-color' style='background-color:${color.v}'></span></span>`;
+    const previewElement = `<span class='inline-style-wrapper'><span class='inline-style' style='background-color:${color.v}'></span></span>`;
     env.content = previewElement + content;
   }
   if (env.type === 'gradient' && env.classes.indexOf('gradient') >= 0) {
-    let gradient = content.split(HTML_TAG).join('');
-    if (gradient) {
-      gradient = gradient.replace('-moz-', '').replace('-ms-', '').replace('-o-', '');
-    }
-    const previewElement = `<span class='inline-color-wrapper'><span class='inline-color' style='background-image:${gradient}'></span></span>`;
+    const gradient = content.split(HTML_TAG).join('');
+    const previewElement = `<span class='inline-style-wrapper'><span class='inline-style' style='background-image:${convertToW3CGradient(gradient)}'></span></span>`;
     env.content = previewElement + content;
   }
   if (env.type === 'angle' && env.classes.indexOf('angle') >= 0) {
-    console.log(content);
+    const angle = content.split(HTML_TAG).join('');
+    const num = parseFloat(angle);
+    const percentage = percentageFun(angle);
+    if (percentage === false || percentage === undefined) {
+      return;
+    }
+    const svg = `<svg viewBox='0 0 64 64'><circle r='16' cy='32' cx='32' style='stroke-dasharray: ${Math.abs(percentage)},500;'></circle></svg>`;
+    const previewElement = `<span class='inline-style-previewer inline-style-previewer-angle' ${num < 0 ? 'data-negative' : ''}>${svg}</span>`;
+    env.content = previewElement + content;
   }
 });

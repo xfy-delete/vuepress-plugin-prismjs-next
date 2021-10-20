@@ -50,6 +50,9 @@ export default (options: optionsType, app: App): PluginObject => {
   console.log('\x1B[36m%s\x1B[0m', 'vuepress plugin loading');
   return {
     name: 'vuepress-plugin-prismjs-next',
+    define: {
+      VUEPRESS_PLUGIN: {},
+    },
     extendsMarkdown(md) {
       options = {
         languages: ['java', 'css', 'javascript', 'typescript', 'html', 'json', 'shell', 'yaml', 'diff'],
