@@ -10,5 +10,7 @@ Prism.plugins.NormalizeWhitespace.setDefaults({
 });
 
 Prism.hooks.add('before-tokenize', (env) => {
-  Prism.hooks.run('before-sanity-check', env);
+  if (Prism.plugins.normalizeWhitespace) {
+    Prism.hooks.run('before-sanity-check', env);
+  }
 });

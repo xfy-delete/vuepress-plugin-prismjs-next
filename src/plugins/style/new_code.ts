@@ -1,10 +1,16 @@
 export default `
 @import '_variables';
 
+pre[class*='language-'][data-line] {
+  position: relative;
+  padding: 1em 0 1em 3em !important;
+}
+
 .copy-to-clipboard-button {
   margin-left: 0.3em;
   cursor: pointer;
 }
+
 .theme-default-content {
   pre,
   pre[class*='language-'] {

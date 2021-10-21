@@ -4,11 +4,13 @@ import 'prismjs/plugins/autolinker/prism-autolinker';
 const linkMd = /\[([^\]]+)\]\(([^)]+)\)/;
 
 Prism.hooks.add('before-tokenize', (env) => {
-  Prism.hooks.run('before-highlight', env);
+  if (Prism.plugins.autoLinker) {
+    Prism.hooks.run('before-highlight', env);
+  }
 });
 
 Prism.hooks.add('wrap', (env) => {
-  if (/-link$/.test(env.type)) {
+  if (Prism.plugins.autoLinker && /-link$/.test(env.type)) {
     env.tag = 'a';
     let href = env.content;
     if (env.type === 'email-link' && href.indexOf('mailto:') !== 0) {

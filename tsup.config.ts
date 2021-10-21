@@ -9,7 +9,8 @@ const tsup: Options = {
   format: ['iife'],
   outDir: './lib/browser',
   bundle: true,
-  dts: true,
+  dts: false,
+  minify: true,
 };
 
 export default tsup;

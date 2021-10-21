@@ -4,33 +4,27 @@ function hasClass(element, className) {
   return element.classList.contains(className);
 }
 
-const clientAppEnhanceFiles: ClientAppEnhance = ({ app, router }) => {
+const clientAppEnhanceFiles: ClientAppEnhance = ({ app }) => {
   app.directive('pre-load', {
     mounted(el) {
       // @ts-ignore
-      if (hasClass(el, 'line-numbers') && typeof loadLineNumbers !== 'undefined') {
-        // @ts-ignore
-        loadLineNumbers([el]);
-      }
-      // @ts-ignore
-      if (typeof lineHighlight !== 'undefined') {
-        // @ts-ignore
-        lineHighlight([el]);
-      }
-      // @ts-ignore
-      if (typeof myToolbar !== 'undefined') {
-        // @ts-ignore
-        myToolbar(el);
-      }
-      // @ts-ignore
-      if (typeof matchBraces !== 'undefined') {
-        // @ts-ignore
-        matchBraces(el);
-      }
-      // @ts-ignore
-      if (typeof PreviewerInitEvents !== 'undefined') {
-        // @ts-ignore
-        PreviewerInitEvents(el, el.getAttribute('lang'));
+      const _VUEPRESS_PLUGIN = VUEPRESS_PLUGIN || {};
+      if (typeof _VUEPRESS_PLUGIN !== 'undefined') {
+        if (!el.getAttribute('no-match-braces') && typeof _VUEPRESS_PLUGIN.MatchBraces !== 'undefined') {
+          _VUEPRESS_PLUGIN.MatchBraces(el);
+        }
+        if (hasClass(el, 'line-numbers') && typeof _VUEPRESS_PLUGIN.LoadLineNumbers !== 'undefined') {
+          _VUEPRESS_PLUGIN.LoadLineNumbers([el]);
+        }
+        if (!el.getAttribute('no-line-highlight') && typeof _VUEPRESS_PLUGIN.LoadLineHighlight !== 'undefined') {
+          _VUEPRESS_PLUGIN.LoadLineHighlight([el]);
+        }
+        if (typeof _VUEPRESS_PLUGIN.LoadToolbar !== 'undefined') {
+          _VUEPRESS_PLUGIN.LoadToolbar(el);
+        }
+        if (!el.getAttribute('no-previewers') && typeof _VUEPRESS_PLUGIN.PreviewerInitEvents !== 'undefined') {
+          _VUEPRESS_PLUGIN.PreviewerInitEvents(el, el.getAttribute('lang'));
+        }
       }
     },
   });

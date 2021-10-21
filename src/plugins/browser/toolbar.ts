@@ -1,4 +1,4 @@
-function myToolbar(preEle: any) {
+function LoadToolbar(preEle: any) {
   if (!preEle || !/pre/i.test(preEle.nodeName)) {
     return;
   }
@@ -27,7 +27,7 @@ function myToolbar(preEle: any) {
 
   const toolbar = document.createElement('div');
   // @ts-ignore
-  toolbar.style = 'top: .3em;right: .5em;';
+  toolbar.style = 'top: 0.3em;right: 1.5em;';
   toolbar.classList.add('toolbar');
   // @ts-ignore
   let elementCallbacks = TOOLBAR_CALLBACKS;
@@ -84,7 +84,11 @@ function registerButton(key, opts) {
   // @ts-ignore
   TOOLBAR_CALLBACKS.push(TOOLBAR_MAP[key] = callback);
 }
-export {
-  myToolbar,
-  registerButton,
-};
+
+// @ts-ignore
+if (typeof VUEPRESS_PLUGIN !== 'undefined') {
+  // @ts-ignore
+  VUEPRESS_PLUGIN.LoadToolbar = LoadToolbar;
+  // @ts-ignore
+  VUEPRESS_PLUGIN.registerButton = registerButton;
+}

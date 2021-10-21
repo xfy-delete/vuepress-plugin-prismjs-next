@@ -1,5 +1,6 @@
-export default function lineHighlight(elements: Array<any>) {
+function LoadLineHighlight(elements: Array<any>) {
   let fakeTimer: NodeJS.Timeout = setTimeout(() => {});
+
   let scrollIntoView = true;
 
   function callFunction(func) {
@@ -202,4 +203,10 @@ export default function lineHighlight(elements: Array<any>) {
       fakeTimer = setTimeout(applyHash, 1);
     }
   });
+}
+
+// @ts-ignore
+if (typeof VUEPRESS_PLUGIN !== 'undefined') {
+  // @ts-ignore
+  VUEPRESS_PLUGIN.LoadLineHighlight = LoadLineHighlight;
 }

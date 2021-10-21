@@ -6,6 +6,7 @@ import { path } from '@vuepress/utils';
 import {
   loadPlugins, loadLanguages, loadCss, setHead,
 } from './plugins';
+import { initPluginSwitch } from './plugins/utils/pluginSwitch';
 
 type optionsType = {
   languages?: Array<string>,
@@ -13,7 +14,10 @@ type optionsType = {
   theme?: string,
   css?: boolean,
   vPre?: true | boolean,
-  lineNumbers?: number | boolean
+  lineNumbers?: number | boolean,
+  NormalizeWhitespace?: {
+    [key: string]: boolean | number | string
+  }
 }
 
 const resizeStr = `
@@ -22,6 +26,9 @@ if (typeof TOOLBAR_CALLBACKS === 'undefined') {
 }
 if (typeof TOOLBAR_MAP === 'undefined') {
   TOOLBAR_MAP = [];
+}
+if (typeof VUEPRESS_PLUGIN === 'undefined') {
+  VUEPRESS_PLUGIN = {};
 }
 window.addEventListener('resize', () => {
   if (typeof lineNumbers !== 'undefined') {
@@ -48,11 +55,9 @@ const plugin = (md: MarkdownIt, options: optionsType, app: App) => {
 
 export default (options: optionsType, app: App): PluginObject => {
   console.log('\x1B[36m%s\x1B[0m', 'vuepress plugin loading');
+  initPluginSwitch();
   return {
     name: 'vuepress-plugin-prismjs-next',
-    define: {
-      VUEPRESS_PLUGIN: {},
-    },
     extendsMarkdown(md) {
       options = {
         languages: ['java', 'css', 'javascript', 'typescript', 'html', 'json', 'shell', 'yaml', 'diff'],

@@ -1,5 +1,4 @@
 import convertToW3CGradient from '../utils/convertToW3CGradient';
-import percentageFun from '../utils/percentage';
 
 const previewers = {
   gradient: (function () {
@@ -16,7 +15,30 @@ const previewers = {
   angle: () => {
     new Previewer('angle', function (this: any, value) {
       const num = parseFloat(value);
-      const percentage = percentageFun(value);
+      let unit = value.match(/[a-z]+$/i);
+      let max; let percentage;
+      if (!num || !unit) {
+        return false;
+      }
+      unit = unit[0];
+      switch (unit) {
+        case 'deg':
+          max = 360;
+          break;
+        case 'grad':
+          max = 400;
+          break;
+        case 'rad':
+          max = 2 * Math.PI;
+          break;
+        case 'turn':
+          max = 1;
+          break;
+        default:
+          break;
+      }
+      percentage = 100 * num / max;
+      percentage %= 100;
       if (percentage === false || percentage === undefined) {
         return false;
       }
@@ -25,8 +47,8 @@ const previewers = {
       return true;
     }, '*', function (this: any) {
       this._elt.innerHTML = '<svg viewBox="0 0 64 64">'
-          + '<circle r="16" cy="32" cx="32"></circle>'
-          + '</svg>';
+        + '<circle r="16" cy="32" cx="32"></circle>'
+        + '</svg>';
     });
   },
   color: () => {
@@ -65,15 +87,15 @@ const previewers = {
       return false;
     }, '*', function (this: any) {
       this._elt.innerHTML = '<svg viewBox="-20 -20 140 140" width="100" height="100">'
-          + '<defs>'
-          + '<marker id="prism-previewer-easing-marker" viewBox="0 0 4 4" refX="2" refY="2" markerUnits="strokeWidth">'
-          + '<circle cx="2" cy="2" r="1.5" />'
-          + '</marker>'
-          + '</defs>'
-          + '<path d="M0,100 C20,50, 40,30, 100,0" />'
-          + '<line x1="0" y1="100" x2="20" y2="50" marker-start="url(#prism-previewer-easing-marker)" marker-end="url(#prism-previewer-easing-marker)" />'
-          + '<line x1="100" y1="0" x2="40" y2="30" marker-start="url(#prism-previewer-easing-marker)" marker-end="url(#prism-previewer-easing-marker)" />'
-          + '</svg>';
+        + '<defs>'
+        + '<marker id="prism-previewer-easing-marker" viewBox="0 0 4 4" refX="2" refY="2" markerUnits="strokeWidth">'
+        + '<circle cx="2" cy="2" r="1.5" />'
+        + '</marker>'
+        + '</defs>'
+        + '<path d="M0,100 C20,50, 40,30, 100,0" />'
+        + '<line x1="0" y1="100" x2="20" y2="50" marker-start="url(#prism-previewer-easing-marker)" marker-end="url(#prism-previewer-easing-marker)" />'
+        + '<line x1="100" y1="0" x2="40" y2="30" marker-start="url(#prism-previewer-easing-marker)" marker-end="url(#prism-previewer-easing-marker)" />'
+        + '</svg>';
     });
   },
   time: () => {
@@ -88,8 +110,8 @@ const previewers = {
       return true;
     }, '*', function (this: any) {
       this._elt.innerHTML = '<svg viewBox="0 0 64 64">'
-          + '<circle r="16" cy="32" cx="32"></circle>'
-          + '</svg>';
+        + '<circle r="16" cy="32" cx="32"></circle>'
+        + '</svg>';
     });
   },
 };
@@ -112,113 +134,137 @@ const getOffset = function (element) {
   };
 };
 
-const Previewer = function (this: any, type, updater, supportedLanguages?, initializer?) {
-  this._elt = null;
-  this._type = type;
-  this._token = null;
-  this.updater = updater;
-  this._mouseout = this.mouseout.bind(this);
-  this.initializer = initializer;
+let previewerActive: any;
 
-  const self = this;
+class Previewer {
+  _elt: any;
 
-  if (!supportedLanguages) {
-    supportedLanguages = ['*'];
-  }
-  if (!Array.isArray(supportedLanguages)) {
-    supportedLanguages = [supportedLanguages];
-  }
-  supportedLanguages.forEach((lang) => {
-    if (typeof lang !== 'string') {
-      lang = lang.lang;
+  _type: any;
+
+  _token: any;
+
+  updater: any;
+
+  _mouseout: any;
+
+  initializer: any;
+
+  static byLanguages: any;
+
+  static byType: any;
+
+  constructor(type, updater, supportedLanguages?, initializer?) {
+    this._elt = null;
+    this._type = type;
+    this._token = null;
+    this.updater = updater;
+    this._mouseout = this.mouseout.bind(this);
+    this.initializer = initializer;
+
+    const self = this;
+
+    if (!supportedLanguages) {
+      supportedLanguages = ['*'];
     }
-    if (!Previewer.byLanguages[lang]) {
-      Previewer.byLanguages[lang] = [];
+    if (!Array.isArray(supportedLanguages)) {
+      supportedLanguages = [supportedLanguages];
     }
-    if (Previewer.byLanguages[lang].indexOf(self) < 0) {
-      Previewer.byLanguages[lang].push(self);
+    supportedLanguages.forEach((lang) => {
+      if (typeof lang !== 'string') {
+        lang = lang.lang;
+      }
+      if (!Previewer.byLanguages[lang]) {
+        Previewer.byLanguages[lang] = [];
+      }
+      if (Previewer.byLanguages[lang].indexOf(self) < 0) {
+        Previewer.byLanguages[lang].push(self);
+      }
+    });
+    Previewer.byType[type] = this;
+  }
+
+  init() {
+    if (this._elt) {
+      return;
     }
-  });
-  Previewer.byType[type] = this;
-};
-
-Previewer.prototype.init = function () {
-  if (this._elt) {
-    return;
-  }
-  this._elt = document.createElement('div');
-  this._elt.className = `prism-previewer prism-previewer-${this._type}`;
-  document.body.appendChild(this._elt);
-  if (this.initializer) {
-    this.initializer();
-  }
-};
-
-Previewer.prototype.isDisabled = function (token) {
-  do {
-    if (token.hasAttribute && token.hasAttribute('data-previewers')) {
-      const previewers = token.getAttribute('data-previewers');
-      return (previewers || '').split(/\s+/).indexOf(this._type) === -1;
+    this._elt = document.createElement('div');
+    this._elt.className = `prism-previewer prism-previewer-${this._type}`;
+    document.body.appendChild(this._elt);
+    if (this.initializer) {
+      this.initializer();
     }
-  } while ((token = token.parentNode));
-  return false;
-};
-
-Previewer.prototype.check = function (token) {
-  if (token.classList.contains('token') && this.isDisabled(token)) {
-    return;
   }
-  do {
-    if (token.classList && token.classList.contains('token') && token.classList.contains(this._type)) {
-      break;
+
+  isDisabled(token) {
+    do {
+      if (token.hasAttribute && token.hasAttribute('data-previewers')) {
+        const previewers = token.getAttribute('data-previewers');
+        return (previewers || '').split(/\s+/).indexOf(this._type) === -1;
+      }
+    } while ((token = token.parentNode));
+    return false;
+  }
+
+  check(token) {
+    if (token.classList.contains('token') && this.isDisabled(token)) {
+      return;
     }
-  } while ((token = token.parentNode));
+    do {
+      if (token.classList && token.classList.contains('token') && token.classList.contains(this._type)) {
+        break;
+      }
+    } while ((token = token.parentNode));
 
-  if (token && token !== this._token) {
-    this._token = token;
-    this.show();
-  }
-};
-
-Previewer.prototype.mouseout = function () {
-  // this._token.removeEventListener('mouseout', this._mouseout, false);
-  this._token = null;
-  this.hide();
-};
-
-Previewer.prototype.show = function () {
-  if (!this._elt) {
-    this.init();
-  }
-  if (!this._token) {
-    return;
-  }
-
-  if (this.updater.call(this._elt, this._token.textContent)) {
-    // this._token.addEventListener('mouseout', this._mouseout, false);
-
-    const offset = getOffset(this._token);
-    this._elt.classList.add('active');
-
-    if (offset.top - this._elt.offsetHeight > 0) {
-      this._elt.classList.remove('flipped');
-      this._elt.style.top = `${offset.top}px`;
-      this._elt.style.bottom = '';
-    } else {
-      this._elt.classList.add('flipped');
-      this._elt.style.bottom = `${offset.bottom}px`;
-      this._elt.style.top = '';
+    if (token && token !== this._token) {
+      this._token = token;
+      this.show();
     }
+  }
 
-    this._elt.style.left = `${offset.left + Math.min(200, offset.width / 2)}px`;
-  } else {
+  mouseout() {
+    this._token.removeEventListener('mouseout', this._mouseout, false);
+    this._token = null;
     this.hide();
   }
-};
 
-Previewer.prototype.hide = function () {
-  this._elt.classList.remove('active');
-};
+  show() {
+    if (!this._elt) {
+      this.init();
+    }
+    if (!this._token) {
+      return;
+    }
+
+    if (this.updater.call(this._elt, this._token.textContent)) {
+      this._token.addEventListener('mouseout', this._mouseout, false);
+      const offset = getOffset(this._token);
+      if (previewerActive) {
+        previewerActive.classList.remove('active');
+        previewerActive = null;
+      }
+      this._elt.classList.add('active');
+      previewerActive = this._elt;
+      if (offset.top - this._elt.offsetHeight > 0) {
+        this._elt.classList.remove('flipped');
+        this._elt.style.top = `${offset.top}px`;
+        this._elt.style.bottom = '';
+      } else {
+        this._elt.classList.add('flipped');
+        this._elt.style.bottom = `${offset.bottom}px`;
+        this._elt.style.top = '';
+      }
+
+      this._elt.style.left = `${offset.left + Math.min(200, offset.width / 2)}px`;
+    } else {
+      this.hide();
+    }
+  }
+
+  hide() {
+    this._elt.classList.remove('active');
+    previewerActive = null;
+  }
+}
 
 Previewer.byLanguages = {};
 
@@ -238,7 +284,7 @@ function PreviewerInitEvents(elt, lang) {
   }
   elt.addEventListener('mouseover', (e) => {
     const target = e.target;
-    previewers.forEach((previewer: any) => {
+    previewers.forEach((previewer: Previewer) => {
       previewer.check(target);
     });
   }, false);

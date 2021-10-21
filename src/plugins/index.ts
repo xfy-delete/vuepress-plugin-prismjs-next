@@ -11,38 +11,39 @@ import fs from 'fs';
 import { path } from '@vuepress/utils';
 import Token from 'markdown-it/lib/token';
 
-import lineNumbers, { loadLineNumbers, setWhiteSpaceStyle } from './line-numbers';
-import lineHighlight from './line-highlight';
-import matchBraces from './match-braces';
+import { lineNumbers, setWhiteSpaceStyle } from './utils/line-numbers';
 import { optionsType } from '..';
-import { myToolbar, registerButton } from './toolbar';
-import showLanguage from './show-language';
-import copyToClipboard from './copy-to-clipboard';
-import downloadButton from './download-button';
-import newCode from '../new_code';
-import oldCode from '../old_code';
-import inlineStyle from './style/inline-style';
+import newCode from './style/new_code';
+import oldCode from './style/old_code';
+import { initPluginSwitch, sitePluginSwitch } from './utils/pluginSwitch';
 
 rawLoadLanguages.silent = true;
 
 let globalPluginsLoad = true;
 
-const localPluginList = {
+const nodePlugins = {
+  'inline-color': true,
   autolinker: true,
   'data-uri-highlight': true,
   'show-invisibles': true,
-  'normalize-whitespace': true,
   previewers: true,
 };
 
-const nodePlugins = {
-  'inline-style': true,
-};
-
-const pluginList = {
+const prismjsPlugins = {
   treeview: true,
   'diff-highlight': true,
   'highlight-keywords': true,
+};
+
+const browserPlugins = {
+  'copy-to-clipboard': true,
+  'download-buttond': true,
+  'line-highlight': true,
+  'line-numbers': true,
+  'match-braces': true,
+  previewers: true,
+  'show-language': true,
+  toolbar: true,
 };
 
 const pluginMap: {
@@ -62,8 +63,10 @@ function isVPre(info: string): boolean | null {
 function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string]: boolean}) {
   md.renderer.rules.fence = (tokens: Array<Token>, idx: number, opts: MarkdownIt.Options) => {
     const preClassList: Array<string> = [];
+    const codeClassList: Array<string> = [];
     const preStyleList: Array<string> = [];
     const codeStyleList: Array<string> = [];
+    const preAttrList: Array<string> = [];
     let lines: [number, string] | null = null;
     const token = tokens[idx];
     if (token.tag !== 'code') {
@@ -71,7 +74,9 @@ function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string
     }
     const info = token.info ? md.utils.unescapeAll(token.info).trim() : '';
     const lang = info.match(/^([a-zA-Z]+)/)?.[1] || 'text';
+    sitePluginSwitch(info, preAttrList);
     const html = opts.highlight?.(token.content, lang, '') || md.utils.escapeHtml(token.content);
+    initPluginSwitch();
     const languageClass = `${md.options.langPrefix}${md.utils.escapeHtml(lang)}`;
     preClassList.push(languageClass);
     if (pluginMap['line-numbers']) {
@@ -83,19 +88,29 @@ function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string
     } else {
       setWhiteSpaceStyle(info, codeStyleList);
     }
-    if (pluginMap.toolbar) {
-      preClassList.push('my-toolbar');
+    if (pluginMap['match-braces']) {
+      codeClassList.push('match-braces');
+      if (/:no-brace-hover\b/.test(info)) {
+        codeClassList.push('no-brace-hover');
+      }
+      if (/:no-brace-select\b/.test(info)) {
+        codeClassList.push('no-brace-select');
+      }
+      if (!(/:no-rainbow-braces\b/.test(info))) {
+        codeClassList.push('rainbow-braces');
+      }
     }
-    if (pluginMap.toolbar && pluginMap['show-language']) {
-      preClassList.push('show-language');
-    }
-    let codeStr = `<code class='${languageClass}' style='${codeStyleList.join('')}'>${html}${lines ? lines[1] : ''}</code>`;
+    let codeStr = `<code class='${languageClass} ${codeClassList.join(' ')}' style='${codeStyleList.join('')}'>${html}${lines ? lines[1] : ''}</code>`;
     const useVPre = isVPre(info) ?? options.vPre;
+    const maxHeightMatch = info.match(/max-height\[([\d,-]+)\]/);
+    if (maxHeightMatch) {
+      preStyleList.push(`max-height: ${maxHeightMatch[1]}px;`);
+    }
     if (useVPre) {
       codeStr = `<code v-pre${codeStr.slice('<code'.length)}`;
     }
     const match = info.match(/{([\d,-]+)}/);
-    return `<pre v-pre-load ${match ? `data-line=${match[1]}` : ''} lang=${lang} class='match-braces rainbow-braces ${preClassList.join(' ')}' style='${preStyleList.join('')}'>${codeStr}</pre>`;
+    return `<pre v-pre-load ${preAttrList.join(' ')} ${match ? `data-line=${match[1]}` : ''} lang=${lang} class='${preClassList.join(' ')}' style='${preStyleList.join('')}'>${codeStr}</pre>`;
   };
 }
 
@@ -137,44 +152,22 @@ function loadPlugins(md: MarkdownIt, app: App, options: optionsType): undefined 
       if (nodePlugins[plugin]) {
         import(path.resolve(__dirname, `./node/${plugin}`));
       }
-      if (localPluginList[plugin]) {
-        import(`./${plugin}`);
-      }
-      if (pluginList[plugin]) {
+      if (prismjsPlugins[plugin]) {
         import(`prismjs/plugins/${plugin}/prism-${plugin}`);
+      }
+      if (browserPlugins[plugin]) {
+        setHead(app, 'script', {}, fs.readFileSync(path.resolve(__dirname, `../browser/${plugin}.global.js`)).toString());
+      }
+      if (plugin === 'normalize-whitespace') {
+        import(path.resolve(__dirname, './node/normalize-whitespace')).then(() => {
+          if (options.NormalizeWhitespace) {
+            Prism.plugins.NormalizeWhitespace.setDefaults(options.NormalizeWhitespace);
+          }
+        });
       }
       pluginMap[plugin] = true;
       index += 1;
     }
-  }
-  if (pluginMap['inline-style']) {
-    setHead(app, 'style', { type: 'text/css' }, inlineStyle);
-  }
-  if (pluginMap['line-numbers']) {
-    setHead(app, 'script', {}, loadLineNumbers.toString());
-  }
-  if (pluginMap['line-highlight']) {
-    setHead(app, 'script', {}, lineHighlight.toString());
-  }
-  if (pluginMap['match-braces']) {
-    // setHead(app, 'script', {}, matchBraces.toString());
-    setHead(app, 'script', {}, fs.readFileSync(path.resolve(__dirname, '../browser/match-braces.global.js')).toString());
-  }
-  if (pluginMap.toolbar) {
-    setHead(app, 'script', {}, registerButton.toString());
-    setHead(app, 'script', {}, myToolbar.toString());
-  }
-  if (pluginMap.toolbar && pluginMap['show-language']) {
-    setHead(app, 'script', {}, showLanguage);
-  }
-  if (pluginMap.toolbar && pluginMap['copy-to-clipboard']) {
-    setHead(app, 'script', {}, copyToClipboard);
-  }
-  if (pluginMap.toolbar && pluginMap['download-button']) {
-    setHead(app, 'script', {}, downloadButton);
-  }
-  if (pluginMap.previewers) {
-    setHead(app, 'script', {}, fs.readFileSync(path.resolve(__dirname, '../browser/previewers.global.js')).toString());
   }
   mdPlugin(md, options, pluginMap);
 }

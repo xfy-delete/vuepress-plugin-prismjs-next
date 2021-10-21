@@ -2,7 +2,6 @@ import Prism from 'prismjs';
 import 'prismjs/components/prism-css-extras';
 import convertToW3CGradient from '../utils/convertToW3CGradient';
 import beforeTokenize from '../utils/previewers';
-import percentageFun from '../utils/percentage';
 
 const HTML_TAG = /<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:'[^']*'|'[^']*'|[^\s''>=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/g;
 
@@ -409,7 +408,7 @@ class Color {
 }
 
 Prism.hooks.add('before-tokenize', (env) => {
-  if (env.previewers) {
+  if (!Prism.plugins.inlineColor || env.previewers) {
     return;
   }
   env.previewers = true;
@@ -417,30 +416,21 @@ Prism.hooks.add('before-tokenize', (env) => {
 });
 
 Prism.hooks.add('wrap', (env) => {
-  const { content } = env;
-  if (env.type === 'color' || env.type === 'hexcode' || env.classes.indexOf('color') >= 0) {
-    const rawText = content.split(HTML_TAG).join('');
-    const color = new Color(rawText);
-    if (!color.v) {
-      return;
+  if (Prism.plugins.inlineColor) {
+    const { content } = env;
+    if (env.type === 'color' || env.type === 'hexcode') {
+      const rawText = content.split(HTML_TAG).join('');
+      const color = new Color(rawText);
+      if (!color.v) {
+        return;
+      }
+      const previewElement = `<span class='inline-color-wrapper'><span class='inline-color' style='background-color:${color.v}'></span></span>`;
+      env.content = previewElement + (env.type === 'hexcode' || color._f === 'hex' || wordToRgb(rawText) ? `<span style='color:${color.v}'>${content}</span>` : content);
     }
-    const previewElement = `<span class='inline-style-wrapper'><span class='inline-style' style='background-color:${color.v}'></span></span>`;
-    env.content = previewElement + content;
-  }
-  if (env.type === 'gradient' && env.classes.indexOf('gradient') >= 0) {
-    const gradient = content.split(HTML_TAG).join('');
-    const previewElement = `<span class='inline-style-wrapper'><span class='inline-style' style='background-image:${convertToW3CGradient(gradient)}'></span></span>`;
-    env.content = previewElement + content;
-  }
-  if (env.type === 'angle' && env.classes.indexOf('angle') >= 0) {
-    const angle = content.split(HTML_TAG).join('');
-    const num = parseFloat(angle);
-    const percentage = percentageFun(angle);
-    if (percentage === false || percentage === undefined) {
-      return;
+    if (env.type === 'gradient' && env.classes.indexOf('gradient') >= 0) {
+      const gradient = content.split(HTML_TAG).join('');
+      const previewElement = `<span class='inline-color-wrapper'><span class='inline-color' style='background-image:${convertToW3CGradient(gradient)}'></span></span>`;
+      env.content = previewElement + content;
     }
-    const svg = `<svg viewBox='0 0 64 64'><circle r='16' cy='32' cx='32' style='stroke-dasharray: ${Math.abs(percentage)},500;'></circle></svg>`;
-    const previewElement = `<span class='inline-style-previewer inline-style-previewer-angle' ${num < 0 ? 'data-negative' : ''}>${svg}</span>`;
-    env.content = previewElement + content;
   }
 });

@@ -20,11 +20,13 @@ export default defineUserConfig<DefaultThemeOptions>({
   plugins: [[
     resolve(__dirname, '../../../lib'),
     {
-      languages: ['less', 'css', 'javascript', 'sass', 'html', 'scss', 'stylus', 'yaml', 'diff'],
-      plugins: ['inline-style'
-      // autolinker', 'data-uri-highlight', 'diff-highlight', 'treeview', 'show-invisibles', 'match-braces',
-      // 'highlight-keywords', 'line-numbers', 'line-highlight', 'toolbar', 'show-language', 'copy-to-clipboard', 'download-button', 'previewers',
-    ],
+      languages: ['less', 'css', 'javascript', 'sass', 'html', 'scss', 'stylus', 'yaml', 'java'],
+      plugins: [
+        'inline-color', 'autolinker', 'data-uri-highlight', 'normalize-whitespace', 'show-invisibles', // node
+       'diff-highlight', 'treeview', 'highlight-keywords', // prismjs
+      'match-braces', 'line-numbers', 'line-highlight', 'toolbar', 'show-language', 'copy-to-clipboard', 'download-button', 'previewers',
+      ],
+      // theme: 'dark'
     }
   ]],
   themeConfig: {

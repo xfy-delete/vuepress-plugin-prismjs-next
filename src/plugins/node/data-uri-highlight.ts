@@ -65,7 +65,7 @@ Prism.plugins.dataURIHighlight = {
 };
 
 Prism.hooks.add('before-tokenize', (env) => {
-  if (dataURI.pattern.test(env.code)) {
+  if (Prism.plugins.dataUriHighlight && dataURI.pattern.test(env.code)) {
     for (const p in dataURI.inside) {
       if (dataURI.inside.hasOwnProperty(p)) {
         if (!dataURI.inside[p].inside && dataURI.inside[p].pattern.test(env.code)) {

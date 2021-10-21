@@ -1,20 +1,14 @@
 export default `
 @import '_variables';
 
-pre[class*='language-']::-webkit-scrollbar-track-piece {
-  background-color: #f8f8f8;
+pre[class*='language-'][data-line] {
+  position: relative;
+  padding: 1em 0 1em 3em !important;
 }
-pre[class*='language-']::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-pre[class*='language-']::-webkit-scrollbar-thumb {
-  //滚动条的设置
-  background-color: #dddddd;
-  background-clip: padding-box;
-}
-pre[class*='language-']::-webkit-scrollbar-thumb:hover {
-  background-color: #bbbbbb;
+
+.copy-to-clipboard-button {
+  margin-left: 0.3em;
+  cursor: pointer;
 }
 
 code[class*='language-'],

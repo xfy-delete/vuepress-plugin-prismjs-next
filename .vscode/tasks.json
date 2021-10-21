@@ -30,23 +30,14 @@
       "label": "tsc: 监视 - esm"
     },
     {
-      "type": "typescript",
-      "tsconfig": "tsconfig.umd.json",
-      "option": "watch",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "type": "npm",
+      "script": "tsup-node",
+      "problemMatcher": [],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "label": "tsc: 监视 - umd"
-    },
-    {
-      "type": "npm",
-      "script": "tsup-node",
-      "problemMatcher": [],
-      "label": "tsup: 监视 - browser",
+      "label": "tsup: 监视 - browser"
     }
   ]
 }

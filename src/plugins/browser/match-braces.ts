@@ -157,6 +157,10 @@ function MatchBraces(preElem) {
       brace.element.classList.add(mapClassName(`brace-level-${level % LEVEL_WARP + 1}`));
     }
   });
+  preElem.classList.remove('match-braces');
+  if (code) {
+    code.classList.remove('match-braces');
+  }
 }
 
 // @ts-ignore
