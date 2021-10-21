@@ -1,12 +1,26 @@
-import type { App, PluginObject } from '@vuepress/core';
+import type {
+  App, HeadAttrsConfig, HeadTagEmpty, HeadTagNonEmpty, PluginObject,
+} from '@vuepress/core';
 import MarkdownIt from 'markdown-it';
 import Prism from 'prismjs';
+import fs from 'fs';
 import { path } from '@vuepress/utils';
 
 import {
-  loadPlugins, loadLanguages, loadCss, setHead,
+  loadPlugins, loadLanguages, loadCss,
 } from './plugins';
 import { initPluginSwitch } from './plugins/utils/pluginSwitch';
+
+const browserPlugins = {
+  'copy-to-clipboard': true,
+  'download-buttond': true,
+  'line-highlight': true,
+  'line-numbers': true,
+  'match-braces': true,
+  previewers: true,
+  'show-language': true,
+  toolbar: true,
+};
 
 type optionsType = {
   languages?: Array<string>,
@@ -27,8 +41,8 @@ if (typeof TOOLBAR_CALLBACKS === 'undefined') {
 if (typeof TOOLBAR_MAP === 'undefined') {
   TOOLBAR_MAP = [];
 }
-if (typeof VUEPRESS_PLUGIN === 'undefined') {
-  VUEPRESS_PLUGIN = {};
+if (typeof VUEPRESS_PLUGINS === 'undefined') {
+  VUEPRESS_PLUGINS = {};
 }
 window.addEventListener('resize', () => {
   if (typeof lineNumbers !== 'undefined') {
@@ -38,12 +52,20 @@ window.addEventListener('resize', () => {
 });
 `;
 
+export function setHead(app: App, type: HeadTagEmpty | HeadTagNonEmpty, attr: HeadAttrsConfig, text?: string) {
+  app.siteData.head = app.siteData.head || [];
+  if (text) {
+    app.siteData.head.push([type as HeadTagNonEmpty, attr, text]);
+  } else {
+    app.siteData.head.push([type as HeadTagEmpty, attr]);
+  }
+}
+
 const plugin = (md: MarkdownIt, options: optionsType, app: App) => {
   if (options) {
-    loadPlugins(md, app, options);
+    loadPlugins(md, options);
     loadLanguages(options.languages);
   }
-  loadCss(app, options);
   md.options.highlight = (code, lang) => {
     const prismLang = Prism.languages[lang];
     const html = prismLang
@@ -53,9 +75,42 @@ const plugin = (md: MarkdownIt, options: optionsType, app: App) => {
   };
 };
 
+function setFile(assetsPath: string, filePath: string, file: string) {
+  fs.stat(assetsPath, (err, stats) => {
+    if (!stats) {
+      fs.mkdirSync(assetsPath, { recursive: true });
+    }
+    fs.writeFileSync(`${assetsPath}${filePath}`, file);
+  });
+}
+
 export default (options: optionsType, app: App): PluginObject => {
   console.log('\x1B[36m%s\x1B[0m', 'vuepress plugin loading');
   initPluginSwitch();
+  const pluginFile = `vuepress-plugin-prism.${Date.now()}.js`;
+  const cssFile = `vuepress-plugin-prism.${Date.now()}.css`;
+  const plugins = options?.plugins;
+  let pluginStr = '';
+  if (plugins) {
+    pluginStr = resizeStr;
+    plugins.forEach((plugin) => {
+      if (browserPlugins[plugin]) {
+        pluginStr += `${fs.readFileSync(path.resolve(__dirname, `./browser/${plugin}.global.js`)).toString()}\n`;
+      }
+    });
+  }
+  const cssStr = loadCss(options);
+  if (app.env.isDev || app.env.isDebug) {
+    if (pluginStr !== '') {
+      setHead(app, 'script', {}, pluginStr);
+    }
+    if (cssStr !== '') {
+      setHead(app, 'style', { type: 'text/css' }, cssStr);
+    }
+  } else if (app.env.isBuild) {
+    setHead(app, 'script', { defer: true, src: `/assets/js/${pluginFile}` });
+    setHead(app, 'link', { rel: 'stylesheet', href: `/assets/css/${cssFile}` });
+  }
   return {
     name: 'vuepress-plugin-prismjs-next',
     extendsMarkdown(md) {
@@ -67,10 +122,19 @@ export default (options: optionsType, app: App): PluginObject => {
         lineNumbers: 3,
         ...(options || {}),
       };
-      setHead(app, 'script', {}, resizeStr);
       plugin(md, options as optionsType, app as App);
     },
     clientAppEnhanceFiles: app.env.isBuild ? path.resolve(__dirname, './clientAppEnhanceFiles.js') : path.resolve(__dirname, './esm/clientAppEnhanceFiles.js'),
+    onGenerated(app: App) {
+      if (pluginStr !== '') {
+        const assetsJsPath = `${path.resolve(app.options.dest)}/assets/js/`;
+        setFile(assetsJsPath, pluginFile, pluginStr);
+      }
+      if (cssStr) {
+        const assetsCssPath = `${path.resolve(app.options.dest)}/assets/css/`;
+        setFile(assetsCssPath, cssFile, cssStr);
+      }
+    },
   };
 };
 

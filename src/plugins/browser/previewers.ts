@@ -291,7 +291,7 @@ function PreviewerInitEvents(elt, lang) {
 }
 
 // @ts-ignore
-if (typeof VUEPRESS_PLUGIN !== 'undefined') {
+if (typeof VUEPRESS_PLUGINS !== 'undefined') {
   // @ts-ignore
-  VUEPRESS_PLUGIN.PreviewerInitEvents = PreviewerInitEvents;
+  VUEPRESS_PLUGINS.PreviewerInitEvents = PreviewerInitEvents;
 }

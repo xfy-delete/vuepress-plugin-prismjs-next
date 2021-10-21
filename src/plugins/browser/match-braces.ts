@@ -164,7 +164,7 @@ function MatchBraces(preElem) {
 }
 
 // @ts-ignore
-if (typeof VUEPRESS_PLUGIN !== 'undefined') {
+if (typeof VUEPRESS_PLUGINS !== 'undefined') {
   // @ts-ignore
-  VUEPRESS_PLUGIN.MatchBraces = MatchBraces;
+  VUEPRESS_PLUGINS.MatchBraces = MatchBraces;
 }

@@ -1,7 +1,7 @@
 // @ts-ignore
-if (typeof VUEPRESS_PLUGIN !== 'undefined' && typeof VUEPRESS_PLUGIN.registerButton !== 'undefined') {
+if (typeof VUEPRESS_PLUGINS !== 'undefined' && typeof VUEPRESS_PLUGINS.registerButton !== 'undefined') {
   // @ts-ignore
-  VUEPRESS_PLUGIN.registerButton('show-language', (preEle) => {
+  VUEPRESS_PLUGINS.registerButton('show-language', (preEle) => {
     if (!preEle || !/pre/i.test(preEle.nodeName)) {
       return;
     }

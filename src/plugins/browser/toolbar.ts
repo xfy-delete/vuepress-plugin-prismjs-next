@@ -27,7 +27,7 @@ function LoadToolbar(preEle: any) {
 
   const toolbar = document.createElement('div');
   // @ts-ignore
-  toolbar.style = 'top: 0.3em;right: 1.5em;';
+  toolbar.style = 'top: 0.3em;right: 1.2em;';
   toolbar.classList.add('toolbar');
   // @ts-ignore
   let elementCallbacks = TOOLBAR_CALLBACKS;
@@ -86,9 +86,9 @@ function registerButton(key, opts) {
 }
 
 // @ts-ignore
-if (typeof VUEPRESS_PLUGIN !== 'undefined') {
+if (typeof VUEPRESS_PLUGINS !== 'undefined') {
   // @ts-ignore
-  VUEPRESS_PLUGIN.LoadToolbar = LoadToolbar;
+  VUEPRESS_PLUGINS.LoadToolbar = LoadToolbar;
   // @ts-ignore
-  VUEPRESS_PLUGIN.registerButton = registerButton;
+  VUEPRESS_PLUGINS.registerButton = registerButton;
 }

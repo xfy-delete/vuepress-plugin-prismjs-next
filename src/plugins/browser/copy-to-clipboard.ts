@@ -66,9 +66,9 @@ function getSettings(startElement) {
 }
 
 // @ts-ignore
-if (typeof VUEPRESS_PLUGIN !== 'undefined' && typeof VUEPRESS_PLUGIN.registerButton !== 'undefined') {
+if (typeof VUEPRESS_PLUGINS !== 'undefined' && typeof VUEPRESS_PLUGINS.registerButton !== 'undefined') {
   // @ts-ignore
-  VUEPRESS_PLUGIN.registerButton('copy-to-clipboard', (preEle) => {
+  VUEPRESS_PLUGINS.registerButton('copy-to-clipboard', (preEle) => {
     const settings = getSettings(preEle);
     const linkCopy = document.createElement('button');
     linkCopy.className = 'copy-to-clipboard-button';

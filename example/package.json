@@ -1,8 +1,8 @@
 {
   "name": "vuepress-plugin-prismjs-example",
   "scripts": {
-    "dev": "set VUEPRESS_PLUGIN_PRISMJS_NEXT=true && vuepress dev docs --clean-cache",
-    "build": "set VUEPRESS_PLUGIN_PRISMJS_NEXT=true && vuepress build docs",
+    "dev": "set VUEPRESS_PLUGINS_PRISMJS_NEXT=true && vuepress dev docs --clean-cache",
+    "build": "set VUEPRESS_PLUGINS_PRISMJS_NEXT=true && vuepress build docs",
     "serve": "http-server ./.dist -p 8888 -c-1"
   },
   "devDependencies": {

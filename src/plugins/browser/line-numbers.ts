@@ -97,7 +97,7 @@ function LoadLineNumbers(elements: Array<any>) {
 }
 
 // @ts-ignore
-if (typeof VUEPRESS_PLUGIN !== 'undefined') {
+if (typeof VUEPRESS_PLUGINS !== 'undefined') {
   // @ts-ignore
-  VUEPRESS_PLUGIN.LoadLineNumbers = LoadLineNumbers;
+  VUEPRESS_PLUGINS.LoadLineNumbers = LoadLineNumbers;
 }

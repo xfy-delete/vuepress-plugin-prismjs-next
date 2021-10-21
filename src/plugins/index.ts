@@ -2,9 +2,6 @@ import config from 'prismjs/components';
 import getLoader from 'prismjs/dependencies';
 import rawLoadLanguages from 'prismjs/components/index';
 import Prism from 'prismjs';
-import {
-  App, HeadAttrsConfig, HeadTagNonEmpty,
-} from '@vuepress/core';
 import MarkdownIt from 'markdown-it';
 import uglifycss from 'uglifycss';
 import fs from 'fs';
@@ -33,17 +30,6 @@ const prismjsPlugins = {
   treeview: true,
   'diff-highlight': true,
   'highlight-keywords': true,
-};
-
-const browserPlugins = {
-  'copy-to-clipboard': true,
-  'download-buttond': true,
-  'line-highlight': true,
-  'line-numbers': true,
-  'match-braces': true,
-  previewers: true,
-  'show-language': true,
-  toolbar: true,
 };
 
 const pluginMap: {
@@ -120,11 +106,6 @@ const isPlugin = (dep: string) => config.plugins[dep] != null;
 
 const getNoCSS = (type: string, name: string) => !!config[type][name].noCSS;
 
-export function setHead(app: App, type: HeadTagNonEmpty, attr: HeadAttrsConfig, text: string) {
-  app.siteData.head = app.siteData.head || [];
-  app.siteData.head.push([type, attr, text]);
-}
-
 const getThemePath = (theme) => {
   if (theme.includes('/')) {
     const [themePackage, themeName] = theme.split('/');
@@ -140,7 +121,7 @@ const getThemePath = (theme) => {
 
 const getPluginPath = getPath('plugins');
 
-function loadPlugins(md: MarkdownIt, app: App, options: optionsType): undefined {
+function loadPlugins(md: MarkdownIt, options: optionsType): undefined {
   if (!globalPluginsLoad) {
     return;
   }
@@ -154,9 +135,6 @@ function loadPlugins(md: MarkdownIt, app: App, options: optionsType): undefined 
       }
       if (prismjsPlugins[plugin]) {
         import(`prismjs/plugins/${plugin}/prism-${plugin}`);
-      }
-      if (browserPlugins[plugin]) {
-        setHead(app, 'script', {}, fs.readFileSync(path.resolve(__dirname, `../browser/${plugin}.global.js`)).toString());
       }
       if (plugin === 'normalize-whitespace') {
         import(path.resolve(__dirname, './node/normalize-whitespace')).then(() => {
@@ -197,13 +175,13 @@ function getFileString(file: string): string {
 
 function defaultCss(scssStr: string) {
   let codeScssPath = '../../../@vuepress/theme-default/lib/client/styles/code.scss';
-  if (process.env.VUEPRESS_PLUGIN_PRISMJS_NEXT && process.env.VUEPRESS_PLUGIN_PRISMJS_NEXT.indexOf('true') !== -1) {
+  if (process.env.VUEPRESS_PLUGINS_PRISMJS_NEXT && process.env.VUEPRESS_PLUGINS_PRISMJS_NEXT.indexOf('true') !== -1) {
     codeScssPath = '../../example/node_modules/@vuepress/theme-default/lib/client/styles/code.scss';
   }
   fs.writeFileSync(path.resolve(__dirname, path.resolve(__dirname, codeScssPath)), scssStr);
 }
 
-function loadCss(app: App, options?: optionsType): undefined {
+function loadCss(options?: optionsType): string | undefined {
   let cssPathList: Array<string> = [];
   let themeCssPath: string | undefined;
   if (options && options.plugins) {
@@ -225,12 +203,13 @@ function loadCss(app: App, options?: optionsType): undefined {
   if (cssStrList.length === 0) {
     return;
   }
-  app.siteData.head = app.siteData.head || [];
-  cssStrList.forEach((cssStr) => {
-    if (cssStr && app.siteData) {
-      app.siteData.head.push(['style', { type: 'text/css' }, cssStr]);
+  let cssStr = '';
+  cssStrList.forEach((css) => {
+    if (css) {
+      cssStr += `${css}\n`;
     }
   });
+  return cssStr;
 }
 export {
   loadPlugins,
