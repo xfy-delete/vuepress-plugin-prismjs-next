@@ -45,9 +45,11 @@ if (typeof VUEPRESS_PLUGINS === 'undefined') {
   VUEPRESS_PLUGINS = {};
 }
 window.addEventListener('resize', () => {
-  if (typeof lineNumbers !== 'undefined') {
-    lineNumbers(Array.prototype.slice.call(document.querySelectorAll('pre.line-numbers[class*=language-]')));
-    lineNumbers(Array.prototype.slice.call(document.querySelectorAll('pre.line-highlight[class*=language-]')));
+  if (typeof VUEPRESS_PLUGINS.LoadLineNumbers !== 'undefined') {
+    VUEPRESS_PLUGINS.LoadLineNumbers(Array.prototype.slice.call(document.querySelectorAll('pre.line-numbers[class*=language-]')));
+  }
+  if (typeof VUEPRESS_PLUGINS.LoadLineHighlight !== 'undefined') {
+    VUEPRESS_PLUGINS.LoadLineHighlight(Array.prototype.slice.call(document.querySelectorAll('pre.line-highlight[class*=language-]')));
   }
 });
 `;
