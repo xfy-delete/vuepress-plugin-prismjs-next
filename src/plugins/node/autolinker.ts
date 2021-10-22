@@ -19,9 +19,7 @@ Prism.plugins.autolinker = {
             pattern: def,
           };
         }
-
         def.inside = def.inside || {};
-
         if (type === 'comment') {
           def.inside['md-link'] = linkMd;
         }
@@ -30,7 +28,6 @@ Prism.plugins.autolinker = {
         } else {
           def.inside['url-link'] = url;
         }
-
         def.inside['email-link'] = email;
       }
     });

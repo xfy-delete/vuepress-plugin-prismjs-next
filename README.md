@@ -1,17 +1,34 @@
-# 测试
+# vuepress-plugin-prismjs-next
 
-autolinker al
+> vuepress 代码美化，基于 `prismjs` 二次封装，使其支持可以在服务端打包。
 
-inline-color ic
+**[在线文档](https://doc.wssio.com/opensource/vuepress-plugin-prismjs-next/)**
+  **[NPM 地址](https://www.npmjs.com/package/vuepress-plugin-prismjs-next)**
 
-previewers pw
+主要功能列表：
 
-show-invisibles si
+1. 语言预加载
 
-line-highlight lh
+2. 主题设置
 
-match-braces mb
+3. 内联颜色
 
-line-numbers ln
+4. 链接突出显示、跳转
 
-toolbar tb
+5. 数据 `uri` 突出显示
+
+6. 格式化空白区域
+
+7. 显示隐藏符号
+
+8. 括号匹配
+
+9. 行号显示
+
+9. 行高亮
+
+10. 工具栏、复制、语言显示
+
+11. 样式预览器
+
+12. 更多功能等待大家的提出

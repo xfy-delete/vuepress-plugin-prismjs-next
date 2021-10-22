@@ -1,19 +1,13 @@
 # 测试
 
-```css
-span.foo {
-	background-color:
-navy;
-	color:
-#BFD;
-}
-
-span.bar {
-	background:
-rgba(105, 0, 12, .38);
-	color:
-hsl(30, 100%, 50%);
-	border-color:
-transparent;
-}
+```js
+/**
+ * Prism: Lightweight, robust, elegant syntax highlighting
+ * MIT license http://www.opensource.org/licenses/mit-license.php/
+ * @author Lea Verou http://lea.verou.me
+ * Reach Lea at fake@email.com (no, not really)
+ * And this is [a Markdown link](prismjs.com). Sweet, huh?
+ */
+var foo = 5;
+// And a single line comment /google.com
 ```
