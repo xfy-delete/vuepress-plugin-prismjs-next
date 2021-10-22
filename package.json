@@ -1,7 +1,7 @@
 {
   "name": "vuepress-plugin-prismjs-next",
   "private": false,
-  "version": "0.26.18",
+  "version": "0.26.19",
   "description": "vuepress prismjs 自定义配置",
   "keywords": [
     "vuepress",
