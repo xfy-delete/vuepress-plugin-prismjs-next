@@ -77,7 +77,11 @@ const plugin = (md: MarkdownIt, options: optionsType, app: App) => {
     loadPlugins(md, options);
   }
   md.options.highlight = (code, lang) => {
-    const prismLang = Prism.languages[lang];
+    let prismLang = Prism.languages[lang];
+    if (!prismLang) {
+      loadLanguages([lang]);
+      prismLang = Prism.languages[lang];
+    }
     const html = prismLang
       ? Prism.highlight(code, prismLang, lang)
       : md.utils.escapeHtml(code);
