@@ -7,13 +7,16 @@ function setWhiteSpaceStyle(info: string, styleList: Array<string>) {
     styleList.push('white-space: pre-line;');
   }
 }
-function lineNumbers(info: string, code: string, preStyleList: Array<string>, codeStyleList: Array<string>, options: optionsType): [number, string] | null {
-  if (/:no-line-numbers\b/.test(info) || (typeof options.lineNumbers === 'boolean' && !options.lineNumbers)) {
+function lineNumbers(info: string, html: string, preStyleList: Array<string>, codeStyleList: Array<string>, options: optionsType): [number, string] | null {
+  if (/:no-line-numbers|no-ln\b/.test(info) || (typeof options.lineNumbers === 'boolean' && !options.lineNumbers)) {
     setWhiteSpaceStyle(info, codeStyleList);
     return null;
   }
-  const lines = code.split('\n').slice(0, -1);
-  if (typeof options.lineNumbers === 'number' && lines.length <= options.lineNumbers) {
+  const NEW_LINE_EXP = /\n(?!$)/g;
+  const linesMatch = html.match(NEW_LINE_EXP);
+  const linesNum = linesMatch ? linesMatch.length + 1 : 1;
+
+  if (typeof options.lineNumbers === 'number' && linesNum <= options.lineNumbers) {
     setWhiteSpaceStyle(info, codeStyleList);
     return null;
   }
@@ -22,15 +25,12 @@ function lineNumbers(info: string, code: string, preStyleList: Array<string>, co
   if (match) {
     startLine = Number.parseInt(match[1], 10);
   }
-  if (startLine < 0 && Math.abs(startLine) > lines.length) {
+  if (startLine < 0 && Math.abs(startLine) > linesNum) {
     startLine = 1;
   }
   let spanStr = '<span aria-hidden=true class="line-numbers-rows">';
-  for (let index = 0; index < lines.length;) {
-    spanStr += '<span></span>';
-    index += 1;
-  }
-  spanStr += '</span>';
+  spanStr = `${spanStr + new Array(linesNum + 1).join('<span></span>')}</span>`;
+
   if (/:pre-wrap|:pre-line\b/.test(info)) {
     spanStr += '<span class="line-numbers-sizer" style="display: none;"></span>';
   }

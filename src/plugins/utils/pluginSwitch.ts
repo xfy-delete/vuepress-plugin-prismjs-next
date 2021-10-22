@@ -1,42 +1,35 @@
 import Prism from 'prismjs';
 
 function sitePluginSwitch(info: string, preAttrList: Array<string>) {
-  if (/:no-inline-color\b/.test(info)) {
+  if (/:no-inline-color|no-ic\b/.test(info)) {
     Prism.plugins.inlineColor = false;
   }
-  if (/:no-autolinker\b/.test(info)) {
+  if (/:no-autolinker|no-al\b/.test(info)) {
     Prism.plugins.autoLinker = false;
   }
-  if (/:no-data-uri-highlight\b/.test(info)) {
-    Prism.plugins.dataUriHighlight = false;
+  if (/:show-invisibles|si\b/.test(info)) {
+    Prism.plugins.showInvisibles = true;
   }
-  if (/:no-normalize-whitespace\b/.test(info)) {
-    Prism.plugins.normalizeWhitespace = false;
-  }
-  if (/:no-show-invisibles\b/.test(info)) {
-    Prism.plugins.showInvisibles = false;
-  }
-  if (/:no-previewers\b/.test(info)) {
+  if (/:no-previewers|no-pw\b/.test(info)) {
     Prism.plugins.previewers = false;
-    preAttrList.push('no-previewers=true');
+    preAttrList.push('no-pw=true');
   }
-  if (/:no-line-highlight\b/.test(info)) {
-    Prism.plugins.previewers = false;
-    preAttrList.push('no-line-highlight=true');
+  if (/:no-line-highlight|no-lh\b/.test(info)) {
+    preAttrList.push('no-lh=true');
   }
-  if (/:no-match-braces\b/.test(info)) {
-    Prism.plugins.previewers = false;
-    preAttrList.push('no-match-braces=true');
+  if (/:no-match-braces|no-mb\b/.test(info)) {
+    preAttrList.push('no-mb=true');
+  }
+  if (/:no-toolbar|no-tb\b/.test(info)) {
+    preAttrList.push('no-tb=true');
   }
 }
 
 function initPluginSwitch() {
   Prism.plugins.inlineColor = true;
   Prism.plugins.autoLinker = true;
-  Prism.plugins.dataUriHighlight = true;
-  Prism.plugins.normalizeWhitespace = true;
   Prism.plugins.previewers = true;
-  Prism.plugins.showInvisibles = true;
+  Prism.plugins.showInvisibles = false;
 }
 
 export {

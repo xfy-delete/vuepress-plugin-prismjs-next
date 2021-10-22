@@ -15,6 +15,9 @@ module.exports = {
     '@typescript-eslint',
   ],
   rules: {
+    'no-plusplus': 'off',
+    'no-bitwise': 'off',
+    'no-multi-assign': 'off',
     'prefer-rest-params': 'off',
     'no-new': 'off',
     'no-shadow': 'off',
@@ -26,6 +29,7 @@ module.exports = {
     'no-empty': 'off',
     'func-names': 'off',
     'no-cond-assign': 'off',
+    'class-methods-use-this': 'off',
     'no-use-before-define': 'off',
     'no-console': 'off',
     'no-continue': 'off',

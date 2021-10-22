@@ -30,7 +30,15 @@ type optionsType = {
   vPre?: true | boolean,
   lineNumbers?: number | boolean,
   NormalizeWhitespace?: {
-    [key: string]: boolean | number | string
+    'remove-trailing'?: boolean,
+    'remove-indent'?: boolean,
+    'left-trim'?: boolean,
+    'right-trim'?: boolean,
+    'break-lines'?: number,
+    'indent'?: number,
+    'remove-initial-line-feed'?: boolean,
+    'tabs-to-spaces'?: number,
+    'spaces-to-tabs'?: number
   }
 }
 
@@ -65,8 +73,8 @@ export function setHead(app: App, type: HeadTagEmpty | HeadTagNonEmpty, attr: He
 
 const plugin = (md: MarkdownIt, options: optionsType, app: App) => {
   if (options) {
-    loadPlugins(md, options);
     loadLanguages(options.languages);
+    loadPlugins(md, options);
   }
   md.options.highlight = (code, lang) => {
     const prismLang = Prism.languages[lang];

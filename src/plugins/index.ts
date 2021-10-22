@@ -7,7 +7,7 @@ import uglifycss from 'uglifycss';
 import fs from 'fs';
 import { path } from '@vuepress/utils';
 import Token from 'markdown-it/lib/token';
-
+import Normalizer from 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace';
 import { lineNumbers, setWhiteSpaceStyle } from './utils/line-numbers';
 import { optionsType } from '..';
 import newCode from './style/new_code';
@@ -47,6 +47,13 @@ function isVPre(info: string): boolean | null {
 }
 
 function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string]: boolean}) {
+  const normalize = new Normalizer({
+    'remove-trailing': true,
+    'remove-indent': true,
+    'left-trim': true,
+    'right-trim': true,
+    ...options.NormalizeWhitespace,
+  });
   md.renderer.rules.fence = (tokens: Array<Token>, idx: number, opts: MarkdownIt.Options) => {
     const preClassList: Array<string> = [];
     const codeClassList: Array<string> = [];
@@ -61,12 +68,16 @@ function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string
     const info = token.info ? md.utils.unescapeAll(token.info).trim() : '';
     const lang = info.match(/^([a-zA-Z]+)/)?.[1] || 'text';
     sitePluginSwitch(info, preAttrList);
-    const html = opts.highlight?.(token.content, lang, '') || md.utils.escapeHtml(token.content);
+    let code = token.content;
+    if (/:normalize-whitespace|nw\b/.test(info) && pluginMap['normalize-whitespace']) {
+      code = normalize.normalize(code);
+    }
+    const html = opts.highlight?.(code, lang, '') || md.utils.escapeHtml(code);
     initPluginSwitch();
     const languageClass = `${md.options.langPrefix}${md.utils.escapeHtml(lang)}`;
     preClassList.push(languageClass);
     if (pluginMap['line-numbers']) {
-      lines = lineNumbers(info, token.content, preStyleList, codeStyleList, options);
+      lines = lineNumbers(info, html, preStyleList, codeStyleList, options);
       if (lines) {
         preClassList.push('line-numbers');
         preStyleList.push(`counter-reset: linenumber ${lines[0] - 1};`);
@@ -135,13 +146,6 @@ function loadPlugins(md: MarkdownIt, options: optionsType): undefined {
       }
       if (prismjsPlugins[plugin]) {
         import(`prismjs/plugins/${plugin}/prism-${plugin}`);
-      }
-      if (plugin === 'normalize-whitespace') {
-        import(path.resolve(__dirname, './node/normalize-whitespace')).then(() => {
-          if (options.NormalizeWhitespace) {
-            Prism.plugins.NormalizeWhitespace.setDefaults(options.NormalizeWhitespace);
-          }
-        });
       }
       pluginMap[plugin] = true;
       index += 1;
