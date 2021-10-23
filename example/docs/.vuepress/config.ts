@@ -22,7 +22,7 @@ export default defineUserConfig<DefaultThemeOptions>({
     {
       languages: ['less', 'css', 'javascript', 'sass', 'html', 'scss', 'stylus', 'yaml', 'java'],
       plugins: [
-        'inline-color', 'autolinker', 'data-uri-highlight', 'normalize-whitespace', 'show-invisibles', // node
+        'inline-color', 'autolinker', 'normalize-whitespace', 'show-invisibles', // node
        'diff-highlight', 'treeview', 'highlight-keywords', // prismjs
       'match-braces', 'line-numbers', 'line-highlight', 'toolbar', 'show-language', 'copy-to-clipboard', 'download-button', 'previewers',
       ],

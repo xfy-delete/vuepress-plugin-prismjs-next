@@ -21,7 +21,6 @@ let globalPluginsLoad = true;
 const nodePlugins = {
   'inline-color': true,
   autolinker: true,
-  'data-uri-highlight': true,
   'show-invisibles': true,
   previewers: true,
 };
@@ -77,7 +76,7 @@ function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string
     const languageClass = `${md.options.langPrefix}${md.utils.escapeHtml(lang)}`;
     preClassList.push(languageClass);
     if (pluginMap['line-numbers']) {
-      lines = lineNumbers(info, html, preStyleList, codeStyleList, options);
+      lines = lineNumbers(info, code, preStyleList, codeStyleList, options);
       if (lines) {
         preClassList.push('line-numbers');
         preStyleList.push(`counter-reset: linenumber ${lines[0] - 1};`);
@@ -87,10 +86,10 @@ function mdPlugin(md: MarkdownIt, options: optionsType, pluginMap: {[key: string
     }
     if (pluginMap['match-braces']) {
       codeClassList.push('match-braces');
-      if (/:no-brace-hover\b/.test(info)) {
+      if (!(/:brace-hover\b/.test(info))) {
         codeClassList.push('no-brace-hover');
       }
-      if (/:no-brace-select\b/.test(info)) {
+      if (!(/:brace-select\b/.test(info))) {
         codeClassList.push('no-brace-select');
       }
       if (!(/:no-rainbow-braces\b/.test(info))) {

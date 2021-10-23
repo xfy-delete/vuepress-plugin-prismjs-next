@@ -1,5 +1,14 @@
 # 测试
 
-```python
-import os
+```js
+
+
+    var example = {
+        foo: true,
+
+        bar: false
+    };
+
+
+
 ```
